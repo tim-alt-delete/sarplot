@@ -1,9 +1,3 @@
-#sysinfo {
-    border: solid green;
-    padding: 1;
-    margin: 1;
-}
-
 #sysinfo Static {
     padding: 1;
     border: solid green;
