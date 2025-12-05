@@ -8,21 +8,13 @@ from views.system_info import SystemInfoView
 from views.process_view import ProcessView
 from views.cpu_plot import CPUPlotView
 
-# An auxiliary function to create labels with border title and subtitle.
-# def make_label_container(
-#     text: str, id: str, border_title: str, border_subtitle: str
-# ) -> Container:
-#     lbl = Label(text, id=id)
-#     lbl.border_title = border_title
-#     lbl.border_subtitle = border_subtitle
-#     return Container(lbl)
-
 class SarPlot(App):
     """Textual app with tabs for system info and CPU plot."""
 
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
         ("q", "quit", "Quit"),
+        ("l", "toggle_live_mode", "Toggle Live Data Mode")
         ]
 
     CSS_PATH = Path(__file__).parent / "styles" / "style.tcss"
@@ -48,8 +40,13 @@ class SarPlot(App):
         )
 
     def action_quit(self) -> None:
+        """quits the application"""
         self.notify("Exiting application...")
-        self.exit()  # Properly quit the app
+        self.exit()
+
+    def action_toggle_live_mode(self) -> None:
+        cpuplot = self.query_one("#cpuplot", CPUPlotView)
+        cpuplot.toggle_mode()
         
     def on_tabs_tab_activated(self, event: Tabs.TabActivated) -> None:
         sysinfo = self.query_one("#sysinfo")

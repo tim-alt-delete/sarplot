@@ -51,10 +51,6 @@ class SystemInfoView(Grid):
             f"Release: {release}\nKernel: {kernel}\nHostname: {hostname}\nUptime: {get_uptime()}"
         )
 
-
-        # self.os_block.border_subtitle = f"Uptime: {uptime}"
-
-
         # CPU & Memory
         cpu_cores = psutil.cpu_count(logical=True)
         memory = f"{round(psutil.virtual_memory().total/(1024**3),2)} GB"
