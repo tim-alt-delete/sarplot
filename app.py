@@ -1,12 +1,7 @@
 
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Tabs, Tab, Static, Label
+from textual.widgets import Header, Footer, Tabs, Tab
 from textual.containers import Container, Grid, Vertical
-from textual_plotext import PlotextPlot
-import platform
-import psutil
-import time
-from textual.widgets import DataTable, Input
 from pathlib import Path
 
 from views.system_info import SystemInfoView

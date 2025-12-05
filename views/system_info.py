@@ -1,5 +1,5 @@
-from textual.containers import Container, Grid, Vertical
-from textual.widgets import Header, Footer, Tabs, Tab, Static, Label
+from textual.containers import Grid
+from textual.widgets import Static
 import platform
 import psutil
 import time

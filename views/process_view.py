@@ -1,4 +1,4 @@
-from textual.containers import Container, Grid, Vertical
+from textual.containers import Vertical
 from textual.widgets import DataTable, Input
 import psutil
 
