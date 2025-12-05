@@ -6,19 +6,28 @@ from textual_plotext import PlotextPlot
 import psutil
 from utils.cpu_stats import get_cpu_stats
 
+class HistoricCPUPlotView(PlotextPlot):
+    pass
+
+class LiveCPUPlotView(PlotextPlot):
+    pass
+
 class CPUPlotView(PlotextPlot):
     """Displays CPU usage plot with toggle between live and historical data."""
-
     
     def compose(self) -> ComposeResult:
-        yield Horizontal(
-            Label("Start (YYYY-MM-DD HH:MM:SS)"),
-            Input(placeholder="2025-12-04 08:00:00", id="start_input"),
-            Label("End"),
-            Input(placeholder="2025-12-04 10:30:00", id="end_input"),
+        yield Vertical(
+            Horizontal(
+                Label("Start (YYYY-MM-DD HH:MM:SS)"),
+                Input(placeholder="2025-12-04 08:00:00", id="start_input")               
+            ),
+            Horizontal(
+                Label("End"),
+                Input(placeholder="2025-12-04 10:30:00", id="end_input")
+            ),
             Button("Apply Range", id="apply_btn")
         )
-        yield PlotextPlot(id="cpu_plot")
+        yield HistoricCPUPlotView()
 
 
     def on_mount(self) -> None:
