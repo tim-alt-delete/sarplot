@@ -1,0 +1,22 @@
+.box {
+    height: 1fr;
+    width: 1fr;
+    border: solid green;
+}
+
+#grid {
+    layout: grid;
+    /* grid-size: cols rows; */
+    grid-size: 3 2;
+    /*
+    grid-columns: 2fr 1fr 1fr;
+    grid-rows: 25% 75%;
+    */
+    grid-columns: 2fr 1fr 1fr;
+    grid-rows: auto;
+}
+
+.grid-box {
+    height: 100%;
+    border: solid green;
+}

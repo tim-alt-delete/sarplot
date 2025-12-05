@@ -1,10 +1,25 @@
 
+from textual.widgets import Label, Input, Button
+from textual.containers import Horizontal, Vertical
+from textual.app import ComposeResult
 from textual_plotext import PlotextPlot
 import psutil
 from utils.cpu_stats import get_cpu_stats
 
 class CPUPlotView(PlotextPlot):
     """Displays CPU usage plot with toggle between live and historical data."""
+
+    
+    def compose(self) -> ComposeResult:
+        yield Horizontal(
+            Label("Start (YYYY-MM-DD HH:MM:SS)"),
+            Input(placeholder="2025-12-04 08:00:00", id="start_input"),
+            Label("End"),
+            Input(placeholder="2025-12-04 10:30:00", id="end_input"),
+            Button("Apply Range", id="apply_btn")
+        )
+        yield PlotextPlot(id="cpu_plot")
+
 
     def on_mount(self) -> None:
         self.mode = "live"  # Default mode

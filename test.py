@@ -1,55 +1,80 @@
-import subprocess
-import json
-import pandas as pd
+from textual.app import App, ComposeResult
+from textual.widgets import TabbedContent, TabPane, Static
+from textual.containers import Vertical, Horizontal, Grid
 
-def get_cpu_stats():
+text = """Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."""
 
-    # 1) Run sadf to get JSON for the desired time window (aggregate CPU only)
-    cmd = ["sadf", "-j", "/var/log/sa/sa04", "--", "-s", "08:00:00", "-e", "10:30:00", "-u"]
-    raw = subprocess.check_output(cmd, text=True)
+class ExampleApp(App):
 
-    # 2) Load JSON
-    data = json.loads(raw)
+    CSS_PATH = "test.tcss"
+    def compose(self) -> ComposeResult:
+        with TabbedContent():
 
-    # 3) Extract the 'statistics' array for the first host
-    host = data["sysstat"]["hosts"][0]
-    stats = host.get("statistics", [])
+            with TabPane('a'):
+                yield Static('1', classes="box")
+                yield Static('2', classes="box")
+                yield Static('3', classes="box")
 
-    # remove empty {}
-    # [{..},{..},{}]
-    stats_filtered = [d for d in stats if d] 
+            with TabPane('b'):
+                with Vertical():
+                    yield Static('1', classes="box")
+                    yield Static('2', classes="box")
+                    yield Static('3', classes="box")
 
-    # 4) Normalize JSON -> flat table
-    #    This flattens 'cpu-load' entries and keeps timestamp fields alongside
-    df = pd.json_normalize(
-        stats_filtered,
-        record_path=["cpu-load"],
-        meta=[["timestamp", "date"],
-            ["timestamp", "time"],
-            ["timestamp", "utc"],
-            ["timestamp", "interval"]],
-        errors="ignore"
-    )
+            with TabPane('c'):
+                with Horizontal():
+                    yield Static('1', classes="box")
+                    yield Static('2', classes="box")
+                    yield Static('3', classes="box")
 
-    # 5) Filter to aggregate CPU ("all") and build a proper timestamp
-    df = df[df["cpu"] == "all"].copy()
-    df["timestamp"] = pd.to_datetime(df["timestamp.date"] + " " + df["timestamp.time"])
-    df.rename(columns={
-        "user": "%user",
-        "nice": "%nice",
-        "system": "%system",
-        "iowait": "%iowait",
-        "steal": "%steal",
-        "idle": "%idle",
-        "timestamp.interval": "interval_seconds",
-        "timestamp.utc": "utc_flag",
-        "cpu": "CPU"
-    }, inplace=True)
+            with TabPane('d'):
+                with Vertical():
+                    with Horizontal():
+                        yield Static('1', classes="box")
+                        yield Static('2', classes="box")
+                    with Horizontal():
+                        yield Static('3', classes="box")
+                        yield Static('4', classes="box")
 
-    # (Optional) order columns and add %busy
-    cols = ["timestamp", "CPU", "%user", "%nice", "%system", "%iowait", "%steal", "%idle",
-            "interval_seconds", "utc_flag"]
-    df = df[cols]
-    df["%busy"] = 100 - df["%idle"]
+            with TabPane('e'):
+                with Grid(id="grid"):
+                    yield Static(text, classes="grid-box")
+                    yield Static(text, classes="grid-box")
+                    yield Static(text, classes="grid-box")
+                    yield Static(text, classes="grid-box")
+                    yield Static(text, classes="grid-box")
+                    yield Static(text, classes="grid-box")
+if __name__ == '__main__':
+    app = ExampleApp()
+    app.run()
 
-    return df
+# from textual.app import App, ComposeResult
+# from textual.containers import Container, Horizontal, VerticalScroll
+# from textual.widgets import Header, Static
+
+
+# class CombiningLayoutsExample(App):
+#     CSS_PATH = "test.tcss"
+
+#     def compose(self) -> ComposeResult:
+#         yield Header()
+#         with Container(id="app-grid"):
+#             with VerticalScroll(id="left-pane"):
+#                 for number in range(15):
+#                     yield Static(f"Vertical layout, child {number}")
+#             with Horizontal(id="top-right"):
+#                 yield Static("Horizontally")
+#                 yield Static("Positioned")
+#                 yield Static("Children")
+#                 yield Static("Here")
+#             with Container(id="bottom-right"):
+#                 yield Static("This")
+#                 yield Static("panel")
+#                 yield Static("is")
+#                 yield Static("using")
+#                 yield Static("grid layout!", id="bottom-right-final")
+
+
+# if __name__ == "__main__":
+#     app = CombiningLayoutsExample()
+#     app.run()

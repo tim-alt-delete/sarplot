@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Tabs, Tab
+from textual.widgets import Header, Footer, TabbedContent, TabPane, Tab, Tabs
 from textual.containers import Container, Grid, Vertical
 from pathlib import Path
 
@@ -10,7 +11,7 @@ from views.cpu_plot import CPUPlotView
 
 class SarPlot(App):
     """Textual app with tabs for system info and CPU plot."""
-
+    COMMAND_PALETTE_BINDING = "p"
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
         ("q", "quit", "Quit"),
@@ -42,7 +43,7 @@ class SarPlot(App):
     def action_quit(self) -> None:
         """quits the application"""
         self.notify("Exiting application...")
-        self.exit()
+        self.exit(return_code=0)
 
     def action_toggle_live_mode(self) -> None:
         cpuplot = self.query_one("#cpuplot", CPUPlotView)
@@ -67,5 +68,8 @@ class SarPlot(App):
             procinfo.display = True
 
 if __name__ == "__main__":
-    SarPlot().run()
+    app = SarPlot()
+    app.run()
+    import sys
+    sys.exit(app.return_code or 0)
 
