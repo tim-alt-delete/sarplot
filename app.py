@@ -16,23 +16,23 @@ class SarPlot(App):
         ("d", "toggle_dark", "Toggle dark mode"),
         ("q", "quit", "Quit"),
         ("l", "toggle_live_mode", "Toggle Live Data Mode")
-        ]
+    ]
 
     CSS_PATH = Path(__file__).parent / "styles" / "style.tcss"
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
-        yield Tabs(Tab("System Info", id="sys"), Tab("CPU", id="cpu"), Tab("Procs", id="procs"))
-        yield SystemInfoView(id="sysinfo")
-        yield ProcessView(id="procinfo")
-        yield CPUPlotView(id="cpuplot")
+        with TabbedContent():
+            with TabPane("System Info", id="sys"):
+                yield SystemInfoView(id="sysinfo")
+            with TabPane("CPU", id="cpu"):
+                yield CPUPlotView(id="cpuplot")
+            with TabPane("Proc", id="procs"):
+                yield ProcessView(id="procinfo")
         yield Footer()
 
     def on_mount(self) -> None:
-        # Initially show System Info and hide CPU plot
-        self.query_one("#sysinfo").display = True
-        self.query_one("#cpuplot").display = False
-        self.query_one("#procinfo").display = False
+        pass
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
@@ -48,24 +48,6 @@ class SarPlot(App):
     def action_toggle_live_mode(self) -> None:
         cpuplot = self.query_one("#cpuplot", CPUPlotView)
         cpuplot.toggle_mode()
-        
-    def on_tabs_tab_activated(self, event: Tabs.TabActivated) -> None:
-        sysinfo = self.query_one("#sysinfo")
-        cpuplot = self.query_one("#cpuplot")
-        procinfo = self.query_one("#procinfo")
-
-        if event.tab.id == "sys":
-            sysinfo.display = True
-            cpuplot.display = False
-            procinfo.display = False
-        elif event.tab.id == "cpu":
-            sysinfo.display = False
-            cpuplot.display = True
-            procinfo.display = False
-        elif event.tab.id == "procs":
-            sysinfo.display = False
-            cpuplot.display = False
-            procinfo.display = True
 
 if __name__ == "__main__":
     app = SarPlot()
