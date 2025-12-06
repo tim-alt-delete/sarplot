@@ -1,5 +1,6 @@
 from textual.containers import Grid
 from textual.widgets import Static
+from textual.events import Resize
 import platform
 import psutil
 import time
@@ -73,3 +74,15 @@ class SystemInfoView(Grid):
             if ips:
                 net_info.append(f"{iface}: {', '.join(ips)}")
         self.net_block.update("\n".join(net_info) if net_info else "No interfaces")
+
+
+    def on_resize(self, event: Resize) -> None:
+        width = event.size[0]
+        if width <= 80: 
+            self.remove_class("sysinfo")
+            self.add_class("sysinfo-small")
+        else:
+            self.remove_class("sysinfo-small")
+            self.add_class("sysinfo")
+
+

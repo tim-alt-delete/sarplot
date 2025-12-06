@@ -21,3 +21,15 @@ Grid {
 #plot_cpu {
     column-span: 3;
 }
+
+.sysinfo-small {
+    layout: vertical;
+    overflow: auto; /* Enables scrolling when content exceeds container size */
+    height: auto;
+}
+
+.sysinfo {
+    layout: grid;
+    grid-size: 2 2;
+    grid-columns: 1fr 1fr;
+}
