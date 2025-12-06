@@ -4,12 +4,20 @@
     height: auto;
 }
 
-
 #sysinfo {
     border: none;
 }
 
-
 Grid {
     padding: 1;
+}
+
+#grid_cpu {
+    layout: grid;
+    grid-size: 3 2;
+    grid-rows: 25% 75%;
+}
+
+#plot_cpu {
+    column-span: 3;
 }

@@ -1,34 +1,29 @@
 
 from textual.widgets import Label, Input, Button
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal, Vertical, Grid
 from textual.app import ComposeResult
 from textual_plotext import PlotextPlot
 import psutil
 from utils.cpu_stats import get_cpu_stats
 
-class HistoricCPUPlotView(PlotextPlot):
-    pass
 
-class LiveCPUPlotView(PlotextPlot):
-    pass
-
-class CPUPlotView(PlotextPlot):
+class CPUPlotView(Grid):
     """Displays CPU usage plot with toggle between live and historical data."""
     
     def compose(self) -> ComposeResult:
-        yield Vertical(
+        yield Grid(
             Horizontal(
-                Label("Start (YYYY-MM-DD HH:MM:SS)"),
+                Label("Start"),
                 Input(placeholder="2025-12-04 08:00:00", id="start_input")               
             ),
             Horizontal(
                 Label("End"),
                 Input(placeholder="2025-12-04 10:30:00", id="end_input")
             ),
-            Button("Apply Range", id="apply_btn")
+            Button("Apply Range", id="apply_btn"), 
+            PlotextPlot(id="plot_cpu"),
+            id="grid_cpu"
         )
-        yield HistoricCPUPlotView()
-
 
     def on_mount(self) -> None:
         self.mode = "live"  # Default mode
@@ -37,7 +32,7 @@ class CPUPlotView(PlotextPlot):
         self.set_interval(1.0, self.update_plot)  # Update every second
 
     def update_plot(self) -> None:
-        plt = self.plt
+        plt = self.query_one("#plot_cpu", PlotextPlot).plt
         plt.clear_figure()
 
         # Collect live CPU usage
@@ -56,7 +51,7 @@ class CPUPlotView(PlotextPlot):
             plt.title("Historical CPU Usage (%)")
 
         plt.ylim(0, 100)
-        self.refresh()
+        self.query_one("#plot_cpu", PlotextPlot).refresh()
 
     def toggle_mode(self) -> None:
         """Switch between live and historical mode."""
