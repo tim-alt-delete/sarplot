@@ -1,22 +1,46 @@
-.box {
-    height: 1fr;
-    width: 1fr;
+VerticalScroll  {
+    height: 20; /* or auto if inside a grid */
+    border: solid white;
+}
+
+Header {
+    border: solid black;
+}
+
+VerticalScroll:focus {
+    border: solid yellow;
+}
+
+Container {
+    border: solid purple;
+}
+
+TabbedContent {
     border: solid green;
 }
 
-#grid {
+Footer {
+    border: solid white;
+}
+
+Grid {
+    border: solid red;
+}
+
+.l1 {
     layout: grid;
-    /* grid-size: cols rows; */
-    grid-size: 3 2;
-    /*
-    grid-columns: 2fr 1fr 1fr;
-    grid-rows: 25% 75%;
-    */
-    grid-columns: 2fr 1fr 1fr;
-    grid-rows: auto;
+    grid-size: 2;
+    grid-columns: 1fr 1fr;
 }
 
-.grid-box {
-    height: 100%;
-    border: solid green;
+.l2 {
+    layout: grid;
+    grid-size: 2;
+    grid-columns: 1fr 1fr;
+}
+
+
+.l1-vertical, .l2-vertical {
+    layout: vertical;
+    overflow-y: auto;   /* Enables scrolling */
 }
