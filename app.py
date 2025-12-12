@@ -34,7 +34,6 @@ class SarPlot(App):
                 yield ProcessView(id="procinfo")
         yield Footer()
         
-
     def on_mount(self) -> None:
         pass
 
@@ -48,10 +47,6 @@ class SarPlot(App):
         """quits the application"""
         self.notify("Exiting application...")
         self.exit(return_code=0)
-
-    def action_toggle_live_mode(self) -> None:
-        cpuplot = self.query_one("#cpuplot", CPUPlotView)
-        cpuplot.toggle_mode()
 
 if __name__ == "__main__":
     app = SarPlot()

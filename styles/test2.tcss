@@ -3,11 +3,7 @@ Grid {
     grid-columns: 2fr 3fr;
 }
 
-#host-info {
-    border: solid blue;
-}
-
-#cpu-info {
+#host-info, #cpu-info, #disk-info {
     border: solid blue;
 }
 

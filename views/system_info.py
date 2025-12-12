@@ -9,7 +9,7 @@ import platform
 import psutil
 import subprocess
 
-from utils.system import get_os_release_info, get_uptime
+from utils.system import get_os_release_info, get_uptime, get_disk_info
 from utils.cpu_stats import get_cpu_stats
 
 
@@ -42,6 +42,7 @@ class SystemInfoView(Container):
             VerticalScroll(
                 Static(id="host-info"),
                 Static(id="cpu-info"),
+                Static(id="disk-info"),
                 id="system-overview"
             ),
             VerticalScroll(
@@ -90,6 +91,9 @@ class SystemInfoView(Container):
 
         self.cpu_info = self.query_one("#cpu-info")
         self.cpu_info.border_title = "CPU"
+
+        self.disk_info = self.query_one("#disk-info")
+        self.disk_info.border_title = "Disks"
         # self.host_info_container = self.query_one("#host-info-container")
         # self.host_info_container.border_title = "Host Info"
 
@@ -154,8 +158,10 @@ class SystemInfoView(Container):
         self.cpu_info.update(f"Model name: {cpu_model_name}\nCores: {cpu_cores}")
 
         # # Disks
-        # disk_info = get_disk_info()
-        # self.disk_info_static.update("\n".join(disk_info) if disk_info else "No disks found")
+        disk_info = subprocess.run("lsblk", shell=True, capture_output=True, text=True, check=True)
+        self.disk_info.update(f"{disk_info.stdout}")
+        #disk_info = get_disk_info()
+        #self.disk_info.update("\n".join(disk_info) if disk_info else "No disks found")
 
         # net_info = get_network_interfaces()
         # self.net_info_static.update("\n".join(net_info) if net_info else "No interfaces")
