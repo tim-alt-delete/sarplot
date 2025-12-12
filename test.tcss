@@ -1,46 +1,31 @@
-VerticalScroll  {
-    height: 20; /* or auto if inside a grid */
-    border: solid white;
+
+Sparkline {
+    width: 20;   /* or any reasonable width */
+    height: 1;   /* optional, for thin sparkline */
 }
 
-Header {
-    border: solid black;
-}
-
-VerticalScroll:focus {
-    border: solid yellow;
-}
-
-Container {
-    border: solid purple;
-}
-
-TabbedContent {
+Vertical {
     border: solid green;
 }
 
-Footer {
-    border: solid white;
+Horizontal {
+    border: solid blue;
+    width: auto;
 }
 
-Grid {
+Static {
+    border: solid yellow;
+    width: auto;
+}
+
+#host-info-container {
     border: solid red;
+    align: center middle;
+    height: auto;
 }
 
-.l1 {
-    layout: grid;
-    grid-size: 2;
-    grid-columns: 1fr 1fr;
-}
-
-.l2 {
-    layout: grid;
-    grid-size: 2;
-    grid-columns: 1fr 1fr;
-}
-
-
-.l1-vertical, .l2-vertical {
-    layout: vertical;
-    overflow-y: auto;   /* Enables scrolling */
+#memory-vertical {
+    align: center top;
+    width: auto;
+    height: auto;
 }

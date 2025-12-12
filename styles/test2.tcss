@@ -1,0 +1,16 @@
+Grid {
+    grid-size: 2;
+    grid-columns: 2fr 3fr;
+}
+
+#host-info {
+    border: solid blue;
+}
+
+#cpu-info {
+    border: solid blue;
+}
+
+VerticalScroll:focus {
+    border: solid yellow;
+}

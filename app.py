@@ -15,21 +15,23 @@ class SarPlot(App):
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
         ("q", "quit", "Quit"),
-        ("l", "toggle_live_mode", "Toggle Live Data Mode")
     ]
 
-    CSS_PATH = Path(__file__).parent / "styles" / "style.tcss"
+    CSS_PATH = Path(__file__).parent / "styles" / "test2.tcss"
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
-        with TabbedContent():
-            with TabPane("System Info", id="sys"):
+        tc = TabbedContent()
+        with tc:
+            tp = TabPane("System Info", id="systab")
+            with tp:
                 yield SystemInfoView(id="sysinfo")
-            with TabPane("CPU", id="cpu"):
+            with TabPane("CPU", id="cputab"):
                 yield CPUPlotView(id="cpuplot")
-            with TabPane("Proc", id="procs"):
+            with TabPane("Proc", id="procstab"):
                 yield ProcessView(id="procinfo")
         yield Footer()
+        
 
     def on_mount(self) -> None:
         pass

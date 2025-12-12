@@ -1,6 +1,6 @@
 #sysinfo Static {
     padding: 1;
-    border: solid green;
+    /*border: solid green;*/
     height: auto;
 }
 
@@ -10,6 +10,7 @@
 
 Grid {
     padding: 1;
+    border: solid green;
 }
 
 #grid_cpu {
@@ -25,11 +26,39 @@ Grid {
 .sysinfo-small {
     layout: vertical;
     overflow: auto; /* Enables scrolling when content exceeds container size */
-    height: auto;
+    height: 100%;
 }
 
 .sysinfo {
     layout: grid;
     grid-size: 2 2;
     grid-columns: 1fr 1fr;
+    grid-gutter: 1;
+    padding: 1;
+    border: solid green;
+}
+
+
+VerticalScroll  {
+    height: 20; /* or auto if inside a grid */
+    border: solid blue;
+}
+
+
+VerticalScroll:focus {
+    border: solid yellow;
+}
+
+Grid {
+    border: solid red;
+}
+
+Container {
+    border: solid green;
+}
+
+#test-grid {
+    grid-size: 2;
+    grid-columns: 1fr 1fr;
+    grid-rows: 20 20;
 }
