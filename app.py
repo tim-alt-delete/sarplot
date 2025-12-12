@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
-from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, TabbedContent, TabPane, Tab, Tabs
-from textual.containers import Container, Grid, Vertical
 from pathlib import Path
+
+from textual.app import App, ComposeResult
+from textual.widgets import Header, Footer, TabbedContent, TabPane
 
 from views.system_info import SystemInfoView
 from views.process_view import ProcessView
 from views.cpu_plot import CPUPlotView
+import sys
+
 
 class SarPlot(App):
     """Textual app with tabs for system info and CPU plot."""

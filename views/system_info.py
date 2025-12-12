@@ -1,23 +1,16 @@
-from textual.containers import Grid, Container, VerticalScroll, Vertical
-from textual.widgets import Static, Sparkline, Label
-from textual.widget import Widget
 
+from textual.containers import Grid, Container, VerticalScroll, Horizontal
+from textual.widgets import Static
 from textual.events import Resize
-import platform
-import psutil
-import time
-from textual.scroll_view import ScrollView
-
-from textual.app import App, ComposeResult
-from utils.system import get_os_release_info, get_uptime, get_network_interfaces, get_disk_info
-
-from textual.widgets import Label, Input, Button
-from textual.containers import Horizontal, Vertical, Grid
 from textual.app import ComposeResult
 from textual_plotext import PlotextPlot
+
+import platform
 import psutil
-from utils.cpu_stats import get_cpu_stats
 import subprocess
+
+from utils.system import get_os_release_info, get_uptime
+from utils.cpu_stats import get_cpu_stats
 
 
 class SystemInfoView(Container):
