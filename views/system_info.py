@@ -57,14 +57,52 @@ class SystemInfoView(Grid):
         self.cpu_block.update(f"Cores: {cpu_cores}\nMemory: {memory}")
 
         # Disks
-        disk_info = []
-        for part in psutil.disk_partitions():
+        filesystems = []
+        for fs in psutil.disk_partitions(all=False):
             try:
-                usage = psutil.disk_usage(part.mountpoint)
-                disk_info.append(f"{part.device}: {round(usage.total/(1024**3),2)} GB total")
+                device = fs.device
+                mountpoint = fs.mountpoint
+                fstype = fs.fstype
+
+                usage = psutil.disk_usage(fs.mountpoint)
+                size_KB = usage.total / 1024
+                used_KB = usage.used / 1024
+                free_KB = usage.free / 1024
+                percent_used = usage.percent
+
+                fs_info = {
+                    "device": device,
+                    "mountpoint": mountpoint,
+                    "fstype": fstype,
+                    "size_KB": size_KB,
+                    "used_KB": used_KB,
+                    "free_KB": free_KB,
+                    "percent_used": percent_used,
+                }
+                filesystems.append(fs_info)
             except PermissionError:
                 continue
-        self.disk_block.update("\n".join(disk_info) if disk_info else "No disks found")
+
+            header = (
+                f"{'Filesystem':<20}"
+                f"{'1K-blocks':>12}"
+                f"{'Used':>12}"
+                f"{'Available':>12}"
+                f"{'Use%':>8}   "
+                f"{'Mounted on':<20}\n"
+            )
+            info_text = header
+
+            for d in filesystems:
+                info_text += (
+                    f"{d['device']:<20}"
+                    f"{d['size_KB']:>12}"
+                    f"{d['used_KB']:>12}"
+                    f"{d['free_KB']:>12}"
+                    f"{d['percent_used']:>7}%   "
+                    f"{d['mountpoint']}\n"
+            )
+        self.disk_block.update(info_text)
 
         # Network Interfaces
         net_info = []
