@@ -1,5 +1,6 @@
 from textual.containers import Vertical
-from textual.widgets import DataTable, Input
+from textual.widgets import DataTable, Input, Static
+from utils.system import get_uptime
 import psutil
 
 PROC_STATES = {
@@ -26,6 +27,7 @@ def format_bytes(num):
 
 class ProcessView(Vertical):
     def compose(self):
+        yield Static(get_uptime(), id="proc_stats")
         yield Input(placeholder="Search process...", id="search")
         yield DataTable(id="proc_table")
 
@@ -34,7 +36,7 @@ class ProcessView(Vertical):
         self.table.zebra_stripes = True
         self.table.cursor_type = "row"
         self.search = self.query_one("#search", Input)
-        self.table.add_columns("PID", "USER", "NI", "VIRT", "RES", "SHR", "S", "CPU%", "MEM%", "Command")
+        self.table.add_columns("PID", "USER", "NI", "VIRT", "RES", "SHR", "S", "CPU%", "MEM%", "TIME+", "Command")
         self.set_interval(2.0, self.refresh_processes)
         self.processes = []  # Store all processes for filtering
 
@@ -59,6 +61,7 @@ class ProcessView(Vertical):
                 status = PROC_STATES.get(proc.status(), "?")
                 cpu_percent = proc.cpu_percent()
                 mem_percent = proc.memory_percent()
+                time = proc.cpu_times().user + proc.cpu_times().system # minutes
                 if proc.cmdline():
                     command = " ".join(proc.cmdline())
                 else:
@@ -75,6 +78,7 @@ class ProcessView(Vertical):
                     "status": status,
                     "cpu_percent": cpu_percent,
                     "mem_percent": mem_percent,
+                    "time": time,
                     "command": command,
                 }
 
@@ -108,5 +112,6 @@ class ProcessView(Vertical):
                     p['status'],
                     p['cpu_percent'],
                     p['mem_percent'],
+                    p['time'],
                     p['command']
                 )
