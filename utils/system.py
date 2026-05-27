@@ -17,3 +17,7 @@ def get_uptime():
     hours = int((uptime_seconds % 86400) // 3600)
     minutes = int((uptime_seconds % 3600) // 60)
     return f"{days}d {hours}h {minutes}m"
+
+def get_load_avg():
+    one, five, fifteen = psutil.getloadavg()
+    return one, five, fifteen
