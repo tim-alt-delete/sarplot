@@ -21,7 +21,7 @@ class SarPlot(App):
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
-        yield Tabs(Tab("System Info", id="sys"), Tab("CPU", id="cpu"), Tab("Procs", id="procs"))
+        yield Tabs(Tab("Procs", id="procs"), Tab("CPU", id="cpu"), Tab("System Info", id="sys") )
         yield SystemInfoView(id="sysinfo")
         yield ProcessView(id="procinfo")
         yield CPUPlotView(id="cpuplot")
@@ -29,9 +29,9 @@ class SarPlot(App):
 
     def on_mount(self) -> None:
         # Initially show System Info and hide CPU plot
-        self.query_one("#sysinfo").display = True
+        self.query_one("#procinfo").display = True
         self.query_one("#cpuplot").display = False
-        self.query_one("#procinfo").display = False
+        self.query_one("#sysinfo").display = False
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
