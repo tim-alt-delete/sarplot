@@ -1,113 +1,147 @@
 from textual.containers import Grid
-from textual.widgets import Static
+from textual.widgets import DataTable
 import platform
 import psutil
-import time
 
 from utils.system import get_os_release_info, get_uptime
 
+
 class SystemInfoView(Grid):
-    """Displays system information in a grid layout with borders and live refresh."""
 
     def on_mount(self) -> None:
-        # Configure grid layout: 2 columns, auto rows
+
+        # Layout
         self.styles.grid_template_columns = "1fr 1fr"
         self.styles.grid_gap = 1
         self.styles.padding = 1
 
-        # Create blocks
-        self.os_block = Static()
-        self.os_block.border_title = "OS Info"
+        self.os_table = DataTable()
+        self.os_table.zebra_stripes = True
+        self.os_table.cursor_type = "row"
+        self.os_table.border_title = "OS Info"
+        self.os_table.add_columns(
+            "Property",
+            "Value",
+        )
 
-        self.cpu_block = Static()
-        self.cpu_block.border_title = "CPU & Memory"
+        self.cpu_table = DataTable()
+        self.cpu_table.zebra_stripes = True
+        self.cpu_table.cursor_type = "row"
+        self.cpu_table.border_title = "CPU & Memory"
+        self.cpu_table.add_columns(
+            "Property",
+            "Value",
+        )
 
-        self.disk_block = Static()
-        self.disk_block.border_title = "Disks"
+        self.disk_table = DataTable()
+        self.disk_table.zebra_stripes = True
+        self.disk_table.cursor_type = "row"
+        self.disk_table.border_title = "Disks"
+        self.disk_table.add_columns(
+            "Filesystem",
+            "1K-blocks",
+            "Used",
+            "Available",
+            "Use%",
+            "Mounted on",
+        )
 
-        self.net_block = Static()
-        self.net_block.border_title = "Network Interfaces"
+        self.net_table = DataTable()
+        self.net_table.zebra_stripes = True
+        self.net_table.cursor_type = "row"
+        self.net_table.border_title = "Network Interfaces"
+        self.net_table.add_columns(
+            "Interface",
+            "IP Address",
+        )
 
-        # Add blocks to grid
-        self.mount(self.os_block)
-        self.mount(self.cpu_block)
-        self.mount(self.disk_block)
-        self.mount(self.net_block)
+        # Mount widgets
+        self.mount(self.os_table)
+        self.mount(self.cpu_table)
+        self.mount(self.disk_table)
+        self.mount(self.net_table)
 
-        # Refresh every 5 seconds
-        self.set_interval(5.0, self.refresh_info)
+        # Refresh every 60 seconds
+        self.set_interval(60.0, self.refresh_info)
         self.refresh_info()
 
     def refresh_info(self) -> None:
-        # OS Info
+        # ================= OS INFO =================
+        self.os_table.clear()
 
         system_info = get_os_release_info()
-        release = system_info.get("PRETTY_NAME", "Unknown")
-        kernel = platform.release()
-        hostname = platform.node()
-        uptime = get_uptime()
 
-        self.os_block.update(
-            f"Release: {release}\nKernel: {kernel}\nHostname: {hostname}\nUptime: {get_uptime()}"
+        self.os_table.add_row(
+            "Release",
+            system_info.get("PRETTY_NAME", "Unknown"),
         )
 
-        # CPU & Memory
+        self.os_table.add_row(
+            "Kernel",
+            platform.release(),
+        )
+
+        self.os_table.add_row(
+            "Hostname",
+            platform.node(),
+        )
+
+        self.os_table.add_row(
+            "Uptime",
+            get_uptime(),
+        )
+
+        # ================= CPU & MEMORY =================
+        self.cpu_table.clear()
         cpu_cores = psutil.cpu_count(logical=True)
-        memory = f"{round(psutil.virtual_memory().total/(1024**3),2)} GB"
-        self.cpu_block.update(f"Cores: {cpu_cores}\nMemory: {memory}")
+        memory = round(
+            psutil.virtual_memory().total / (1024 ** 3),
+            2,
+        )
+        self.cpu_table.add_row(
+            "CPU Cores",
+            str(cpu_cores),
+        )
+        self.cpu_table.add_row(
+            "Memory",
+            f"{memory} GB",
+        )
 
-        # Disks
-        filesystems = []
+        # ================= DISKS =================
+        self.disk_table.clear()
+
         for fs in psutil.disk_partitions(all=False):
+
             try:
-                device = fs.device
-                mountpoint = fs.mountpoint
-                fstype = fs.fstype
-
                 usage = psutil.disk_usage(fs.mountpoint)
-                size_KB = usage.total / 1024
-                used_KB = usage.used / 1024
-                free_KB = usage.free / 1024
-                percent_used = usage.percent
 
-                fs_info = {
-                    "device": device,
-                    "mountpoint": mountpoint,
-                    "fstype": fstype,
-                    "size_KB": size_KB,
-                    "used_KB": used_KB,
-                    "free_KB": free_KB,
-                    "percent_used": percent_used,
-                }
-                filesystems.append(fs_info)
-            except PermissionError:
+                self.disk_table.add_row(
+                    fs.device,
+                    str(int(usage.total / 1024)),
+                    str(int(usage.used / 1024)),
+                    str(int(usage.free / 1024)),
+                    f"{usage.percent}%",
+                    fs.mountpoint,
+                )
+
+            except Exception:
                 continue
 
-            header = (
-                f"{'Filesystem':<20}"
-                f"{'1K-blocks':>12}"
-                f"{'Used':>12}"
-                f"{'Available':>12}"
-                f"{'Use%':>8}   "
-                f"{'Mounted on':<20}\n"
-            )
-            info_text = header
+        # ================= NETWORK =================
 
-            for d in filesystems:
-                info_text += (
-                    f"{d['device']:<20}"
-                    f"{d['size_KB']:>12}"
-                    f"{d['used_KB']:>12}"
-                    f"{d['free_KB']:>12}"
-                    f"{d['percent_used']:>7}%   "
-                    f"{d['mountpoint']}\n"
-            )
-        self.disk_block.update(info_text)
+        self.net_table.clear()
 
-        # Network Interfaces
-        net_info = []
         for iface, addrs in psutil.net_if_addrs().items():
-            ips = [a.address for a in addrs if a.family == 2]  # AF_INET
+
+            ips = [
+                a.address
+                for a in addrs
+                if a.family == 2
+            ]
+
             if ips:
-                net_info.append(f"{iface}: {', '.join(ips)}")
-        self.net_block.update("\n".join(net_info) if net_info else "No interfaces")
+
+                self.net_table.add_row(
+                    iface,
+                    ", ".join(ips),
+                )
