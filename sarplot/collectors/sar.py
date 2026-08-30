@@ -215,14 +215,19 @@ class TimeSeries:
         return positions, points
 
 
+def has_sadf() -> bool:
+    """Whether the ``sadf`` binary is installed."""
+    return shutil.which(SADF_BINARY) is not None
+
+
 def is_available() -> bool:
     """Whether ``sadf`` exists and at least one archive is readable."""
-    return shutil.which(SADF_BINARY) is not None and bool(list_log_files())
+    return has_sadf() and bool(list_log_files())
 
 
 def missing_reason() -> str:
     """A human-readable explanation of why history is unavailable."""
-    if shutil.which(SADF_BINARY) is None:
+    if not has_sadf():
         return "The 'sadf' command was not found. Install sysstat to enable historical metrics."
     searched = ", ".join(LOG_DIRECTORIES)
     return (

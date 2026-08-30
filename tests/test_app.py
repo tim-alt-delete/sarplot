@@ -11,6 +11,7 @@ from sarplot.app import TAB_VIEWS, SarPlot
 from sarplot.collectors import sar
 from sarplot.views.process_view import COLUMNS
 from sarplot.widgets.confirm import ConfirmScreen
+from sarplot.widgets.prompt import IntPromptScreen
 
 COLUMN_INDEX = {column.key: index for index, column in enumerate(COLUMNS)}
 SIZE = (150, 45)
@@ -246,6 +247,106 @@ class TestProcessActions:
         finally:
             if child.poll() is None:
                 child.kill()
+            child.wait()
+
+
+class TestRenice:
+    @staticmethod
+    async def _open_prompt(app, pilot, pid):
+        view = app.query_one("#processes")
+        view._filter = str(pid)
+        view._sync_table()
+        await pilot.pause()
+        app.query_one("#proc-table", DataTable).move_cursor(row=0)
+        await pilot.pause()
+        view.action_renice()
+        await settle(pilot)
+        return view
+
+    async def test_renices_a_real_child_process(self):
+        import subprocess
+
+        import psutil
+
+        child = subprocess.Popen(["sleep", "300"])
+        try:
+            app = SarPlot(refresh=0.5)
+            async with app.run_test(size=SIZE) as pilot:
+                await settle(pilot, 0.8)
+                await self._open_prompt(app, pilot, child.pid)
+                assert isinstance(app.screen, IntPromptScreen)
+
+                app.screen.query_one("#prompt-input", Input).value = "5"
+                app.screen._on_submit()
+                await settle(pilot, 0.4)
+
+                assert not isinstance(app.screen, IntPromptScreen)
+                assert psutil.Process(child.pid).nice() == 5
+        finally:
+            child.kill()
+            child.wait()
+
+    async def test_rejects_a_non_numeric_value_without_closing(self):
+        import subprocess
+
+        child = subprocess.Popen(["sleep", "300"])
+        try:
+            app = SarPlot(refresh=0.5)
+            async with app.run_test(size=SIZE) as pilot:
+                await settle(pilot, 0.8)
+                await self._open_prompt(app, pilot, child.pid)
+
+                app.screen.query_one("#prompt-input", Input).value = "abc"
+                app.screen._on_submit()
+                await pilot.pause()
+
+                assert isinstance(app.screen, IntPromptScreen)
+                error = text_of(app.screen.query_one("#prompt-error", Static))
+                assert "whole number" in error
+        finally:
+            child.kill()
+            child.wait()
+
+    async def test_enforces_the_nice_range(self):
+        import subprocess
+
+        child = subprocess.Popen(["sleep", "300"])
+        try:
+            app = SarPlot(refresh=0.5)
+            async with app.run_test(size=SIZE) as pilot:
+                await settle(pilot, 0.8)
+                await self._open_prompt(app, pilot, child.pid)
+
+                app.screen.query_one("#prompt-input", Input).value = "99"
+                app.screen._on_submit()
+                await pilot.pause()
+
+                assert isinstance(app.screen, IntPromptScreen)
+                assert "19" in text_of(app.screen.query_one("#prompt-error", Static))
+        finally:
+            child.kill()
+            child.wait()
+
+    async def test_escape_cancels_without_changing_anything(self):
+        import subprocess
+
+        import psutil
+
+        child = subprocess.Popen(["sleep", "300"])
+        try:
+            before = psutil.Process(child.pid).nice()
+            app = SarPlot(refresh=0.5)
+            async with app.run_test(size=SIZE) as pilot:
+                await settle(pilot, 0.8)
+                await self._open_prompt(app, pilot, child.pid)
+
+                await pilot.press("escape")
+                await settle(pilot)
+
+                assert not isinstance(app.screen, IntPromptScreen)
+                assert psutil.Process(child.pid).nice() == before
+        finally:
+            child.kill()
             child.wait()
 
 

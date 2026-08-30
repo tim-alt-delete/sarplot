@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-import shutil
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -100,7 +99,7 @@ class HistoryView(Vertical):
         if explicit and all(value != explicit for _, value in options):
             options.insert(0, (f"{Path(explicit).name}  (custom)", explicit))
 
-        self._available = bool(options) and shutil.which(sar.SADF_BINARY) is not None
+        self._available = bool(options) and sar.has_sadf()
 
         if not self._available:
             yield Static(self._unavailable_message(), id="history-unavailable")
@@ -156,12 +155,6 @@ class HistoryView(Vertical):
             "  sudo systemctl enable --now sysstat\n\n"
             "Live metrics on the other tabs are unaffected."
         )
-
-    def _resolve_initial_file(self) -> str:
-        """Honour an explicit --file, else default to the newest archive."""
-        if self._initial_file:
-            return str(Path(self._initial_file))
-        return str(self._archives[0].path) if self._archives else ""
 
     def on_mount(self) -> None:
         if self._available:
