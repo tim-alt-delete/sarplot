@@ -7,12 +7,14 @@ import sys
 
 from sarplot import __version__
 from sarplot.app import DEFAULT_TAB, SarPlot
+from sarplot.collectors import logs
 from sarplot.views.history_view import normalise_time
 
 TAB_CHOICES = {
     "processes": "tab-processes",
     "live": "tab-live",
     "history": "tab-history",
+    "logs": "tab-logs",
     "system": "tab-system",
 }
 
@@ -59,6 +61,27 @@ def build_parser() -> argparse.ArgumentParser:
         default="processes",
         help="Tab to open on startup (default: %(default)s).",
     )
+    parser.add_argument(
+        "-L",
+        "--log-file",
+        metavar="PATH",
+        help="Log file to open in the Logs tab. Defaults to the system log, "
+        "falling back to the most recent readable file in the log directory.",
+    )
+    parser.add_argument(
+        "-D",
+        "--log-dir",
+        metavar="DIR",
+        default=logs.DEFAULT_LOG_DIR,
+        help="Directory the log explorer is rooted at (default: %(default)s).",
+    )
+    parser.add_argument(
+        "--log-lines",
+        type=int,
+        default=5000,
+        metavar="N",
+        help="Log lines retained in memory (default: %(default)s).",
+    )
     parser.add_argument("-V", "--version", action="version", version=f"sarplot {__version__}")
     return parser
 
@@ -69,6 +92,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.refresh <= 0:
         parser.error("--refresh must be greater than zero")
+
+    if args.log_lines < 1:
+        parser.error("--log-lines must be at least 1")
 
     start = normalise_time(args.start)
     if start is None:
@@ -87,6 +113,9 @@ def main(argv: list[str] | None = None) -> int:
         end=end,
         refresh=args.refresh,
         initial_tab=TAB_CHOICES.get(args.tab, DEFAULT_TAB),
+        log_file=args.log_file,
+        log_dir=args.log_dir,
+        log_lines=args.log_lines,
     )
     app.run()
     return app.return_code or 0

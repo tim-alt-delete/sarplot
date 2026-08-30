@@ -53,12 +53,10 @@ class TestParser:
             build_parser().parse_args(["--tab", "nope"])
 
     def test_tab_choices_map_to_real_pane_ids(self):
-        assert set(TAB_CHOICES.values()) == {
-            "tab-processes",
-            "tab-live",
-            "tab-history",
-            "tab-system",
-        }
+        """Every --tab choice must name a pane the app actually builds."""
+        from sarplot.app import TAB_VIEWS
+
+        assert set(TAB_CHOICES.values()) == set(TAB_VIEWS)
 
 
 class TestMainValidation:

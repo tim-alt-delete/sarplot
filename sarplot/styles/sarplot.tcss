@@ -186,3 +186,76 @@ IntPromptScreen {
 #prompt-buttons Button {
     margin-left: 2;
 }
+
+/* ------------------------------------------------------------------ Logs  */
+
+#logs {
+    height: 1fr;
+}
+
+#log-sidebar {
+    width: 38;
+    border: round $primary;
+    border-title-color: $text;
+    border-title-style: bold;
+    margin: 1 0 1 1;
+}
+
+#log-sidebar:focus-within {
+    border: round $accent;
+}
+
+#log-tree {
+    height: 1fr;
+    padding: 0 1;
+}
+
+#log-tree-missing {
+    padding: 1;
+    color: $text-warning;
+}
+
+#log-main {
+    width: 1fr;
+    border: round $primary;
+    border-title-color: $text;
+    border-title-style: bold;
+    margin: 1;
+}
+
+#log-main:focus-within {
+    border: round $accent;
+}
+
+#log-controls {
+    height: auto;
+    padding: 0 1;
+}
+
+#log-search {
+    width: 1fr;
+    margin-right: 1;
+}
+
+#log-controls Checkbox {
+    width: auto;
+    border: none;
+    padding: 0 1;
+    background: transparent;
+}
+
+#log-output {
+    height: 1fr;
+    padding: 0 1;
+    scrollbar-size-horizontal: 1;
+}
+
+#log-status {
+    height: auto;
+    padding: 0 1;
+    color: $text-muted;
+}
+
+#log-status.-error {
+    color: $error;
+}

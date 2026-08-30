@@ -8,8 +8,10 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.widgets import Footer, Header, TabbedContent, TabPane
 
+from sarplot.collectors import logs
 from sarplot.views.history_view import HistoryView
 from sarplot.views.live_view import LiveView
+from sarplot.views.log_view import LogView
 from sarplot.views.process_view import ProcessView
 from sarplot.views.system_view import SystemInfoView
 
@@ -18,6 +20,7 @@ TAB_VIEWS = {
     "tab-processes": "#processes",
     "tab-live": "#live",
     "tab-history": "#history",
+    "tab-logs": "#logs",
     "tab-system": "#system",
 }
 
@@ -44,6 +47,9 @@ class SarPlot(App):
         end: str = "",
         refresh: float = 2.0,
         initial_tab: str = DEFAULT_TAB,
+        log_file: str | None = None,
+        log_dir: str = logs.DEFAULT_LOG_DIR,
+        log_lines: int = 5000,
     ) -> None:
         super().__init__()
         self._sa_file = sa_file
@@ -51,6 +57,9 @@ class SarPlot(App):
         self._end = end
         self._refresh = refresh
         self._initial_tab = initial_tab
+        self._log_file = log_file
+        self._log_dir = log_dir
+        self._log_lines = log_lines
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
@@ -65,6 +74,13 @@ class SarPlot(App):
                     initial_file=self._sa_file,
                     initial_start=self._start,
                     initial_end=self._end,
+                )
+            with TabPane("Logs", id="tab-logs"):
+                yield LogView(
+                    id="logs",
+                    log_file=self._log_file,
+                    log_dir=self._log_dir,
+                    max_lines=self._log_lines,
                 )
             with TabPane("System", id="tab-system"):
                 yield SystemInfoView(id="system")
@@ -104,7 +120,7 @@ class SarPlot(App):
         if selector is None:
             return
         view = self.query_one(selector)
-        for method in ("refresh_processes", "reload", "refresh_info"):
+        for method in ("refresh_processes", "reload", "reload_log", "refresh_info"):
             action = getattr(view, method, None)
             if action is not None:
                 action()
