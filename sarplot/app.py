@@ -1,71 +1,112 @@
-#!/usr/bin/env python
-from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Tabs, Tab
-from textual.containers import Container, Grid, Vertical
+"""The sarplot application shell."""
+
+from __future__ import annotations
+
 from pathlib import Path
 
-from views.system_info import SystemInfoView
-from views.process_view import ProcessView
-from views.cpu_plot import CPUPlotView
+from textual.app import App, ComposeResult
+from textual.binding import Binding
+from textual.widgets import Footer, Header, TabbedContent, TabPane
+
+from sarplot.views.history_view import HistoryView
+from sarplot.views.live_view import LiveView
+from sarplot.views.process_view import ProcessView
+from sarplot.views.system_view import SystemInfoView
+
+#: Tab id -> the view id it contains, used to pause off-screen timers.
+TAB_VIEWS = {
+    "tab-processes": "#processes",
+    "tab-live": "#live",
+    "tab-history": "#history",
+    "tab-system": "#system",
+}
+
+DEFAULT_TAB = "tab-processes"
+
 
 class SarPlot(App):
-    """Textual app with tabs for system info and CPU plot."""
+    """A terminal dashboard for live system metrics and sar history."""
+
+    TITLE = "sarplot"
+    CSS_PATH = Path(__file__).parent / "styles" / "sarplot.tcss"
 
     BINDINGS = [
-        ("d", "toggle_dark", "Toggle dark mode"),
-        ("q", "quit", "Quit"),
-        ("l", "toggle_live_mode", "Toggle Live Data Mode")
-        ]
+        Binding("q", "quit", "Quit"),
+        Binding("d", "toggle_theme", "Theme"),
+        Binding("f5", "refresh_all", "Refresh"),
+    ]
 
-    CSS_PATH = Path(__file__).parent / "styles" / "style.tcss"
+    def __init__(
+        self,
+        *,
+        sa_file: str | None = None,
+        start: str = "",
+        end: str = "",
+        refresh: float = 2.0,
+        initial_tab: str = DEFAULT_TAB,
+    ) -> None:
+        super().__init__()
+        self._sa_file = sa_file
+        self._start = start
+        self._end = end
+        self._refresh = refresh
+        self._initial_tab = initial_tab
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
-        yield Tabs(Tab("Procs", id="procs"), Tab("CPU", id="cpu"), Tab("System Info", id="sys") )
-        yield SystemInfoView(id="sysinfo")
-        yield ProcessView(id="procinfo")
-        yield CPUPlotView(id="cpuplot")
+        with TabbedContent(initial=self._initial_tab, id="tabs"):
+            with TabPane("Processes", id="tab-processes"):
+                yield ProcessView(id="processes", interval=self._refresh)
+            with TabPane("Live", id="tab-live"):
+                yield LiveView(id="live")
+            with TabPane("History", id="tab-history"):
+                yield HistoryView(
+                    id="history",
+                    initial_file=self._sa_file,
+                    initial_start=self._start,
+                    initial_end=self._end,
+                )
+            with TabPane("System", id="tab-system"):
+                yield SystemInfoView(id="system")
         yield Footer()
 
     def on_mount(self) -> None:
-        # Initially show System Info and hide CPU plot
-        self.query_one("#procinfo").display = True
-        self.query_one("#cpuplot").display = False
-        self.query_one("#sysinfo").display = False
+        # Every view mounts at once, so pause the ones that start hidden
+        # rather than letting four timers poll in the background.
+        self._sync_timers(self._initial_tab)
 
-    def action_toggle_dark(self) -> None:
-        """An action to toggle dark mode."""
-        self.theme = (
-            "textual-dark" if self.theme == "textual-light" else "textual-light"
-        )
+    def on_tabbed_content_tab_activated(self, event: TabbedContent.TabActivated) -> None:
+        self._sync_timers(event.pane.id)
 
-    def action_quit(self) -> None:
-        """quits the application"""
-        self.notify("Exiting application...")
-        self.exit()
+    def _sync_timers(self, active_tab: str | None) -> None:
+        """Run only the active tab's polling timer."""
+        for tab_id, selector in TAB_VIEWS.items():
+            try:
+                view = self.query_one(selector)
+            except Exception:
+                continue
+            resume = getattr(view, "resume", None)
+            pause = getattr(view, "pause", None)
+            if tab_id == active_tab:
+                if resume is not None:
+                    resume()
+            elif pause is not None:
+                pause()
 
-    def action_toggle_live_mode(self) -> None:
-        cpuplot = self.query_one("#cpuplot", CPUPlotView)
-        cpuplot.toggle_mode()
-        
-    def on_tabs_tab_activated(self, event: Tabs.TabActivated) -> None:
-        sysinfo = self.query_one("#sysinfo")
-        cpuplot = self.query_one("#cpuplot")
-        procinfo = self.query_one("#procinfo")
+    def action_toggle_theme(self) -> None:
+        """Flip between the light and dark variants."""
+        self.theme = "textual-light" if self.theme == "textual-dark" else "textual-dark"
 
-        if event.tab.id == "sys":
-            sysinfo.display = True
-            cpuplot.display = False
-            procinfo.display = False
-        elif event.tab.id == "cpu":
-            sysinfo.display = False
-            cpuplot.display = True
-            procinfo.display = False
-        elif event.tab.id == "procs":
-            sysinfo.display = False
-            cpuplot.display = False
-            procinfo.display = True
-
-if __name__ == "__main__":
-    SarPlot().run()
-
+    def action_refresh_all(self) -> None:
+        """Force the active view to re-read its data."""
+        active = self.query_one("#tabs", TabbedContent).active
+        selector = TAB_VIEWS.get(active)
+        if selector is None:
+            return
+        view = self.query_one(selector)
+        for method in ("refresh_processes", "reload", "refresh_info"):
+            action = getattr(view, method, None)
+            if action is not None:
+                action()
+                self.notify("Refreshed.")
+                return

@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sarplot"
+version = "0.2.0"
+description = "A terminal dashboard for live system metrics and sysstat (sar) history."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+keywords = ["sar", "sysstat", "monitoring", "tui", "textual", "htop"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "textual>=8.0",
+    "textual-plotext>=1.0",
+    "psutil>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+sarplot = "sarplot.cli:main"
+
+[project.urls]
+Repository = "https://github.com/tim/sarplot"
+
+[tool.setuptools.packages.find]
+include = ["sarplot*"]
+
+[tool.setuptools.package-data]
+sarplot = ["styles/*.tcss"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "C4",   # comprehensions
+    "SIM",  # simplify
+    "RUF",
+]
+ignore = [
+    "B008",   # function call in default argument
+    "RUF012", # Textual declares BINDINGS/COLUMNS as plain mutable class attrs
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+asyncio_mode = "auto"

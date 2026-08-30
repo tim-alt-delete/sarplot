@@ -1,150 +1,151 @@
-from textual.containers import Grid
-from textual.widgets import DataTable
-import platform
-from utils.system import get_kernel_version
-import psutil
+"""A static overview of the host: OS, hardware, filesystems and network."""
 
-from utils.system import get_uptime
+from __future__ import annotations
+
+import psutil
+from rich.text import Text
+from textual.app import ComposeResult
+from textual.containers import Grid, VerticalScroll
+from textual.widgets import DataTable, Static
+
+from sarplot.collectors import system
+from sarplot.formatting import format_bytes
+
+#: Host facts change rarely; usage does, but not fast enough to poll hard.
+REFRESH_SECONDS = 15.0
 
 
 class SystemInfoView(Grid):
+    """Four panels of host information, refreshed on a slow timer."""
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self._timer = None
+
+    def compose(self) -> ComposeResult:
+        with VerticalScroll(id="host-panel", classes="info-panel"):
+            yield Static(id="host-info")
+        with VerticalScroll(id="resource-panel", classes="info-panel"):
+            yield Static(id="resource-info")
+        with VerticalScroll(id="disk-panel", classes="info-panel"):
+            yield DataTable(id="disk-table")
+        with VerticalScroll(id="net-panel", classes="info-panel"):
+            yield DataTable(id="net-table")
 
     def on_mount(self) -> None:
+        self.query_one("#host-panel").border_title = "Host"
+        self.query_one("#resource-panel").border_title = "CPU & Memory"
+        self.query_one("#disk-panel").border_title = "Filesystems"
+        self.query_one("#net-panel").border_title = "Network"
 
-        # Layout
-        self.styles.grid_template_columns = "1fr 1fr"
-        self.styles.grid_gap = 1
-        self.styles.padding = 1
+        disks = self.query_one("#disk-table", DataTable)
+        disks.add_columns("Filesystem", "Type", "Size", "Used", "Avail", "Use%", "Mounted on")
+        disks.zebra_stripes = True
+        disks.cursor_type = "row"
 
-        self.os_table = DataTable()
-        self.os_table.zebra_stripes = True
-        self.os_table.cursor_type = "row"
-        self.os_table.border_title = "OS Info"
-        self.os_table.add_columns(
-            "Property",
-            "Value",
-        )
+        net = self.query_one("#net-table", DataTable)
+        net.add_columns("Interface", "State", "Speed", "IPv4", "IPv6")
+        net.zebra_stripes = True
+        net.cursor_type = "row"
 
-        self.cpu_table = DataTable()
-        self.cpu_table.zebra_stripes = True
-        self.cpu_table.cursor_type = "row"
-        self.cpu_table.border_title = "CPU & Memory"
-        self.cpu_table.add_columns(
-            "Property",
-            "Value",
-        )
-
-        self.disk_table = DataTable()
-        self.disk_table.zebra_stripes = True
-        self.disk_table.cursor_type = "row"
-        self.disk_table.border_title = "Disks"
-        self.disk_table.add_columns(
-            "Filesystem",
-            "1K-blocks",
-            "Used",
-            "Available",
-            "Use%",
-            "Mounted on",
-        )
-
-        self.net_table = DataTable()
-        self.net_table.zebra_stripes = True
-        self.net_table.cursor_type = "row"
-        self.net_table.border_title = "Network Interfaces"
-        self.net_table.add_columns(
-            "Interface",
-            "IP Address",
-        )
-
-        # Mount widgets
-        self.mount(self.os_table)
-        self.mount(self.cpu_table)
-        self.mount(self.disk_table)
-        self.mount(self.net_table)
-
-        # Refresh every 60 seconds
-        self.set_interval(60.0, self.refresh_info)
+        self._timer = self.set_interval(REFRESH_SECONDS, self.refresh_info)
         self.refresh_info()
 
+    def pause(self) -> None:
+        """Stop refreshing while the tab is hidden."""
+        if self._timer is not None:
+            self._timer.pause()
+
+    def resume(self) -> None:
+        if self._timer is not None:
+            self._timer.resume()
+            self.refresh_info()
+
     def refresh_info(self) -> None:
-        # ================= OS INFO =================
-        self.os_table.clear()
+        self._render_host()
+        self._render_resources()
+        self._render_disks()
+        self._render_network()
 
-        # system_info = get_os_release_info()
+    def _render_host(self) -> None:
+        rows = [
+            ("Hostname", system.get_hostname()),
+            ("OS", system.get_distribution()),
+            ("Kernel", system.get_kernel()),
+            ("Architecture", psutil.os.uname().machine if hasattr(psutil.os, "uname") else ""),
+            ("Uptime", system.get_uptime()),
+            ("Booted", system.get_boot_time()),
+            ("Privileges", "root" if system.is_root() else "unprivileged"),
+        ]
+        self.query_one("#host-info", Static).update(_definition_list(rows))
 
-        kernel_info = get_kernel_version()
+    def _render_resources(self) -> None:
+        physical, logical = system.get_cpu_counts()
+        memory = psutil.virtual_memory()
+        swap = psutil.swap_memory()
+        one, five, fifteen = system.get_load_avg()
 
-        # self.os_table.add_row(
-        #     "Release",
-        #     system_info.get("PRETTY_NAME", "Unknown"),
-        # )
+        frequency = ""
+        try:
+            current = psutil.cpu_freq()
+            if current and current.current:
+                frequency = f"{current.current / 1000:.2f} GHz"
+        except (NotImplementedError, AttributeError, OSError):
+            # cpu_freq is unavailable in many containers and on Apple silicon.
+            frequency = ""
 
-        self.os_table.add_row(
-            "Kernel",
-            platform.release(),
-        )
+        rows = [
+            ("Model", system.get_cpu_model()),
+            ("Cores", f"{physical} physical / {logical} logical"),
+        ]
+        if frequency:
+            rows.append(("Frequency", frequency))
+        rows += [
+            ("Load average", f"{one:.2f}  {five:.2f}  {fifteen:.2f}"),
+            (
+                "Memory",
+                f"{format_bytes(memory.used)} used of {format_bytes(memory.total)} "
+                f"({memory.percent:.1f}%)",
+            ),
+            ("Available", format_bytes(memory.available)),
+            (
+                "Swap",
+                f"{format_bytes(swap.used)} used of {format_bytes(swap.total)} "
+                f"({swap.percent:.1f}%)"
+                if swap.total
+                else "none configured",
+            ),
+        ]
+        self.query_one("#resource-info", Static).update(_definition_list(rows))
 
-        self.os_table.add_row(
-            "Hostname",
-            platform.node(),
-        )
+    def _render_disks(self) -> None:
+        table = self.query_one("#disk-table", DataTable)
+        table.clear()
+        for disk in system.get_disks():
+            table.add_row(
+                disk.device,
+                disk.fstype,
+                Text(format_bytes(disk.total), justify="right"),
+                Text(format_bytes(disk.used), justify="right"),
+                Text(format_bytes(disk.free), justify="right"),
+                Text(f"{disk.percent:.0f}%", justify="right"),
+                disk.mountpoint,
+            )
 
-        self.os_table.add_row(
-            "Uptime",
-            get_uptime(),
-        )
+    def _render_network(self) -> None:
+        table = self.query_one("#net-table", DataTable)
+        table.clear()
+        for interface in system.get_interfaces():
+            table.add_row(
+                interface.name,
+                "up" if interface.is_up else "down",
+                f"{interface.speed_mbps} Mb/s" if interface.speed_mbps else "-",
+                ", ".join(interface.ipv4) or "-",
+                ", ".join(interface.ipv6) or "-",
+            )
 
-        # ================= CPU & MEMORY =================
-        self.cpu_table.clear()
-        cpu_cores = psutil.cpu_count(logical=True)
-        memory = round(
-            psutil.virtual_memory().total / (1024 ** 3),
-            2,
-        )
-        self.cpu_table.add_row(
-            "CPU Cores",
-            str(cpu_cores),
-        )
-        self.cpu_table.add_row(
-            "Memory",
-            f"{memory} GB",
-        )
 
-        # ================= DISKS =================
-        self.disk_table.clear()
-
-        for fs in psutil.disk_partitions(all=False):
-
-            try:
-                usage = psutil.disk_usage(fs.mountpoint)
-
-                self.disk_table.add_row(
-                    fs.device,
-                    str(int(usage.total / 1024)),
-                    str(int(usage.used / 1024)),
-                    str(int(usage.free / 1024)),
-                    f"{usage.percent}%",
-                    fs.mountpoint,
-                )
-
-            except Exception:
-                continue
-
-        # ================= NETWORK =================
-
-        self.net_table.clear()
-
-        for iface, addrs in psutil.net_if_addrs().items():
-
-            ips = [
-                a.address
-                for a in addrs
-                if a.family == 2
-            ]
-
-            if ips:
-
-                self.net_table.add_row(
-                    iface,
-                    ", ".join(ips),
-                )
+def _definition_list(rows: list[tuple[str, str]]) -> str:
+    """Render label/value pairs with the labels aligned."""
+    width = max((len(label) for label, _ in rows), default=0)
+    return "\n".join(f"[dim]{label:<{width}}[/dim]  {value}" for label, value in rows)

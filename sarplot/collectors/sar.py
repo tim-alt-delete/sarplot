@@ -188,11 +188,29 @@ class TimeSeries:
 
         stamps: list[datetime] = []
         points: list[float] = []
-        for stamp, value in zip(self.timestamps, values):
+        for stamp, value in zip(self.timestamps, values, strict=False):
             if value is not None:
                 stamps.append(stamp)
                 points.append(value)
         return stamps, points
+
+    def indexed(self, name: str) -> tuple[list[int], list[float]]:
+        """Return non-null points as ``(position, value)`` pairs.
+
+        Positions index into `timestamps`, so a sparse series stays aligned
+        with a shared time axis instead of being compressed toward zero.
+        """
+        values = self.columns.get(name)
+        if values is None:
+            return [], []
+
+        positions: list[int] = []
+        points: list[float] = []
+        for index, value in enumerate(values):
+            if value is not None:
+                positions.append(index)
+                points.append(value)
+        return positions, points
 
 
 def is_available() -> bool:

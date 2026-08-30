@@ -1,16 +1,188 @@
-#sysinfo Static {
-    padding: 1;
-    border: solid green;
+/* sarplot - all layout and styling lives here, not in Python. */
+
+Screen {
+    background: $surface;
+}
+
+/* ------------------------------------------------------------ shared bits */
+
+.control-label {
+    padding: 1 1 0 2;
+    color: $text-muted;
+}
+
+#history-status,
+#proc-status {
+    padding: 0 1;
     height: auto;
+    color: $text-muted;
 }
 
-
-#sysinfo {
-    border: none;
+#history-status.-error {
+    color: $error;
 }
 
+/* ------------------------------------------------------------- Processes  */
 
-Grid {
+#processes {
+    height: 1fr;
+}
+
+#proc-header {
+    height: auto;
+    padding: 1 2 0 2;
+}
+
+#proc-search {
+    margin: 1 2 0 2;
+}
+
+#proc-table {
+    height: 1fr;
+    margin: 1 2 0 2;
+}
+
+/* --------------------------------------------------------------- History  */
+
+#history-controls {
+    height: auto;
+    padding: 1 1 0 1;
+}
+
+#history-controls Select {
+    width: 32;
+    margin: 0 1;
+}
+
+#history-controls .time-input {
+    width: 14;
+    margin: 0 1;
+}
+
+#history-controls Button {
+    margin: 0 1;
+}
+
+#history-body {
+    height: 1fr;
+}
+
+#series-select {
+    width: 34;
+    border: round $primary;
+    border-title-color: $text;
+    margin: 1;
+}
+
+#history-plot {
+    height: 1fr;
+    margin: 1 1 0 0;
+}
+
+#history-unavailable {
+    padding: 2 4;
+    height: auto;
+    border: round $warning;
+}
+
+/* ------------------------------------------------------------------ Live  */
+
+#live-controls {
+    height: auto;
+    padding: 1 1 0 1;
+}
+
+#live-controls Select {
+    width: 32;
+    margin: 0 1;
+}
+
+#live-readout {
+    padding: 1 2 0 2;
+    color: $text-muted;
+}
+
+#live-plot {
+    height: 1fr;
+    margin: 1;
+}
+
+/* ---------------------------------------------------------------- System  */
+
+#system {
+    layout: grid;
+    grid-size: 2 2;
+    grid-columns: 1fr 1fr;
+    grid-rows: 1fr 1fr;
+    grid-gutter: 1;
     padding: 1;
 }
 
+.info-panel {
+    /* A border is required for border_title to render at all. */
+    border: round $primary;
+    border-title-color: $text;
+    border-title-style: bold;
+    padding: 0 1;
+}
+
+.info-panel:focus-within {
+    border: round $accent;
+}
+
+#host-info,
+#resource-info {
+    height: auto;
+    padding: 1 0;
+}
+
+/* ---------------------------------------------------------------- Modals  */
+
+ConfirmScreen,
+IntPromptScreen {
+    align: center middle;
+}
+
+#confirm-dialog,
+#prompt-dialog {
+    width: 66;
+    height: auto;
+    padding: 1 2;
+    background: $panel;
+    border: thick $error;
+}
+
+#prompt-dialog {
+    border: thick $primary;
+}
+
+#confirm-title,
+#prompt-title {
+    text-style: bold;
+    width: 100%;
+    padding-bottom: 1;
+}
+
+#confirm-detail,
+#prompt-detail {
+    height: auto;
+    padding-bottom: 1;
+    color: $text-muted;
+}
+
+#prompt-error {
+    height: auto;
+    color: $error;
+}
+
+#confirm-buttons,
+#prompt-buttons {
+    height: auto;
+    align-horizontal: right;
+    padding-top: 1;
+}
+
+#confirm-buttons Button,
+#prompt-buttons Button {
+    margin-left: 2;
+}
