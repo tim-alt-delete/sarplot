@@ -802,3 +802,43 @@ class TestLogFollow:
                 assert kept == {"good.log", "visible"}
         finally:
             blocked.chmod(0o755)
+
+
+class TestLogSeverityStyling:
+    async def test_severity_lines_are_actually_styled(self, tmp_path):
+        """Regression: styles were written as '$text-error', which Rich does
+        not understand, so every line rendered unstyled."""
+        path = tmp_path / "s.log"
+        path.write_text("plain line\nERROR bad thing\nWARNING careful\n")
+
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path), log_file=str(path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            lines = app.query_one("#log-output", RichLog).lines
+
+            def first_style(strip):
+                for segment in strip._segments:
+                    if segment.text.strip():
+                        return str(segment.style)
+                return ""
+
+            assert first_style(lines[0]) in ("None", "none", "")
+            assert first_style(lines[1]) not in ("None", "none", "")
+            assert first_style(lines[2]) not in ("None", "none", "")
+
+    async def test_styles_follow_the_app_theme(self, tmp_path):
+        path = tmp_path / "s.log"
+        path.write_text("ERROR bad thing\n")
+
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path), log_file=str(path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+
+            def error_style():
+                strip = app.query_one("#log-output", RichLog).lines[0]
+                return str(next(s.style for s in strip._segments if s.text.strip()))
+
+            before = error_style()
+            app.action_toggle_theme()
+            await settle(pilot, 0.4)
+            assert error_style() != before

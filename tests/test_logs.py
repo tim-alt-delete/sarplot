@@ -401,3 +401,53 @@ class TestDiscovery:
     )
     def test_rotated_names_are_recognised(self, name, rotated):
         assert logs.is_rotated_name(Path(name)) is rotated
+
+
+class TestLevelStyleResolution:
+    """Rich cannot parse Textual's '$variable' syntax.
+
+    Passing '$text-error' straight to Text() silently produces no styling at
+    all, so theme variables have to be resolved to real colours first.
+    """
+
+    def test_resolves_colours_from_theme_variables(self):
+        from sarplot.views.log_view import resolve_level_styles
+
+        resolved = resolve_level_styles(
+            {"text-error": "#D17E92", "text-warning": "#FFC473", "text-accent": "#88C0D0"}
+        )
+        assert resolved[logs.Level.ERROR] == "#D17E92"
+        assert resolved[logs.Level.WARNING] == "#FFC473"
+        assert resolved[logs.Level.CRITICAL] == "bold #D17E92"
+
+    def test_every_level_resolves_to_a_parseable_rich_style(self):
+        from rich.style import Style
+
+        from sarplot.views.log_view import resolve_level_styles
+
+        resolved = resolve_level_styles({"text-error": "#D17E92"})
+        for level, style in resolved.items():
+            Style.parse(style)  # must not raise
+            assert isinstance(style, str), level
+
+    def test_non_colour_theme_values_fall_back(self):
+        """`text-muted` is 'auto 60%', which Rich rejects."""
+        from rich.style import Style
+
+        from sarplot.views.log_view import resolve_level_styles
+
+        resolved = resolve_level_styles({"text-error": "auto 60%"})
+        Style.parse(resolved[logs.Level.ERROR])
+        assert "auto" not in resolved[logs.Level.ERROR]
+
+    def test_missing_variables_fall_back_to_named_colours(self):
+        from sarplot.views.log_view import LEVEL_FALLBACKS, resolve_level_styles
+
+        resolved = resolve_level_styles({})
+        assert resolved[logs.Level.ERROR] == LEVEL_FALLBACKS[logs.Level.ERROR]
+        assert resolved[logs.Level.CRITICAL] == LEVEL_FALLBACKS[logs.Level.CRITICAL]
+
+    def test_covers_every_level(self):
+        from sarplot.views.log_view import resolve_level_styles
+
+        assert set(resolve_level_styles({})) == set(logs.Level)

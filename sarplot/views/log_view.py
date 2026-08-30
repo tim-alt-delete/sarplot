@@ -8,6 +8,8 @@ from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 
+from rich.errors import StyleSyntaxError
+from rich.style import Style
 from rich.text import Text
 from textual import on
 from textual.app import ComposeResult
@@ -24,15 +26,56 @@ POLL_SECONDS = 0.5
 #: Lines retained in memory. Bounds both the ring buffer and the RichLog.
 DEFAULT_MAX_LINES = 5000
 
-#: Style per severity, resolved against the active Textual theme.
-LEVEL_STYLES: dict[logs.Level, str] = {
-    logs.Level.CRITICAL: "bold $text-error",
-    logs.Level.ERROR: "$text-error",
-    logs.Level.WARNING: "$text-warning",
-    logs.Level.NOTICE: "$text-accent",
-    logs.Level.INFO: "",
-    logs.Level.DEBUG: "$text-muted",
+#: Severity -> (theme variable supplying the colour, extra Rich attributes).
+#: Resolved against the live theme at mount, because Rich cannot parse
+#: Textual's "$variable" syntax: passing "$text-error" straight to Text()
+#: yields no styling at all.
+LEVEL_VARIABLES: dict[logs.Level, tuple[str | None, str]] = {
+    logs.Level.CRITICAL: ("text-error", "bold"),
+    logs.Level.ERROR: ("text-error", ""),
+    logs.Level.WARNING: ("text-warning", ""),
+    logs.Level.NOTICE: ("text-accent", ""),
+    logs.Level.INFO: (None, ""),
+    logs.Level.DEBUG: (None, "dim"),
 }
+
+#: Used when a theme variable is missing or not a plain colour.
+LEVEL_FALLBACKS: dict[logs.Level, str] = {
+    logs.Level.CRITICAL: "bold red",
+    logs.Level.ERROR: "red",
+    logs.Level.WARNING: "yellow",
+    logs.Level.NOTICE: "cyan",
+    logs.Level.INFO: "",
+    logs.Level.DEBUG: "dim",
+}
+
+
+def resolve_level_styles(variables: dict[str, str]) -> dict[logs.Level, str]:
+    """Build Rich style strings for each severity from theme variables.
+
+    Theme values are not always plain colours - `text-muted` is `auto 60%`,
+    which Rich rejects - so every candidate is validated and falls back to a
+    named colour if it will not parse.
+    """
+    resolved: dict[logs.Level, str] = {}
+    for level, (variable, attributes) in LEVEL_VARIABLES.items():
+        candidate = ""
+        if variable is not None:
+            colour = (variables or {}).get(variable, "")
+            if colour:
+                candidate = f"{attributes} {colour}".strip()
+
+        # The fallbacks already carry their own attributes, so they are used
+        # verbatim rather than prefixed again ("bold bold red").
+        if not candidate:
+            candidate = LEVEL_FALLBACKS[level]
+
+        try:
+            Style.parse(candidate)
+        except StyleSyntaxError:
+            candidate = LEVEL_FALLBACKS[level]
+        resolved[level] = candidate
+    return resolved
 
 
 @dataclass
@@ -151,6 +194,7 @@ class LogView(Horizontal):
         self._error = ""
         self._match_offsets: list[int] = []
         self._match_index = -1
+        self._level_styles: dict[logs.Level, str] = dict(LEVEL_FALLBACKS)
 
     # --------------------------------------------------------------- compose
 
@@ -183,6 +227,9 @@ class LogView(Horizontal):
             yield Static("", id="log-status")
 
     def on_mount(self) -> None:
+        self._level_styles = resolve_level_styles(self.app.theme_variables)
+        self.app.theme_changed_signal.subscribe(self, self._on_theme_changed)
+
         self.query_one("#log-main").border_title = "No log open"
         sidebar = self.query_one("#log-sidebar")
         sidebar.border_title = self._log_dir
@@ -194,6 +241,11 @@ class LogView(Horizontal):
             self.open_path(initial)
         else:
             self._show_empty_state()
+
+    def _on_theme_changed(self, _theme) -> None:
+        """Re-resolve severity colours when the app theme changes."""
+        self._level_styles = resolve_level_styles(self.app.theme_variables)
+        self._redraw()
 
     def _resolve_initial_file(self) -> Path | None:
         if self._initial_file:
@@ -412,7 +464,7 @@ class LogView(Horizontal):
         markup enabled would parse square brackets, and syslog's canonical
         `program[pid]:` format would be silently swallowed as markup tags.
         """
-        style = LEVEL_STYLES.get(line.level, "") if line.level else ""
+        style = self._level_styles.get(line.level, "") if line.level else ""
         text = Text(line.text, style=style, no_wrap=True, end="")
 
         for start, end in self._query.spans(line.text):
@@ -430,7 +482,7 @@ class LogView(Horizontal):
         self._match_offsets = []
 
         if self._error:
-            output.write(Text(self._error, style="$text-warning"))
+            output.write(Text(self._error, style=self._level_styles[logs.Level.WARNING]))
             self._update_status()
             return
 
