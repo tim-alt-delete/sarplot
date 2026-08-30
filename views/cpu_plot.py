@@ -9,7 +9,7 @@ class CPUPlotView(PlotextPlot):
     def on_mount(self) -> None:
         self.mode = "live"  # Default mode
         self.cpu_history = []
-        self.df = get_cpu_stats()  # Historical data
+        # self.df = get_cpu_stats()  # Historical data
         self.set_interval(1.0, self.update_plot)  # Update every second
 
     def update_plot(self) -> None:

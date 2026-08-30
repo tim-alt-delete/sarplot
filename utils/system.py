@@ -1,15 +1,18 @@
 import time
+import platform
 import psutil
 
-def get_os_release_info():
-    info = {}
-    with open("/etc/os-release") as f:
-        for line in f:
-            if "=" in line:
-                key, value = line.strip().split("=", 1)
-                info[key] = value.strip('"')
-    return info
+def get_kernel_version():
+    return platform.uname()
 
+# def get_os_release_info():
+#     info = {}
+#     with open("/etc/os-release") as f:
+#         for line in f:
+#             if "=" in line:
+#                 key, value = line.strip().split("=", 1)
+#                 info[key] = value.strip('"')
+#     return info
 
 def get_uptime():
     uptime_seconds = time.time() - psutil.boot_time()

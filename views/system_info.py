@@ -1,9 +1,10 @@
 from textual.containers import Grid
 from textual.widgets import DataTable
 import platform
+from utils.system import get_kernel_version
 import psutil
 
-from utils.system import get_os_release_info, get_uptime
+from utils.system import get_uptime
 
 
 class SystemInfoView(Grid):
@@ -69,12 +70,14 @@ class SystemInfoView(Grid):
         # ================= OS INFO =================
         self.os_table.clear()
 
-        system_info = get_os_release_info()
+        # system_info = get_os_release_info()
 
-        self.os_table.add_row(
-            "Release",
-            system_info.get("PRETTY_NAME", "Unknown"),
-        )
+        kernel_info = get_kernel_version()
+
+        # self.os_table.add_row(
+        #     "Release",
+        #     system_info.get("PRETTY_NAME", "Unknown"),
+        # )
 
         self.os_table.add_row(
             "Kernel",
