@@ -255,9 +255,7 @@ class HistoryView(Vertical):
 
         if series is None or not series:
             selector.clear_options()
-            self._set_status(
-                f"No {event.request.metric.label} samples in this range.", error=True
-            )
+            self._set_status(f"No {event.request.metric.label} samples in this range.", error=True)
             self._clear_plot("No data in the selected range")
             return
 

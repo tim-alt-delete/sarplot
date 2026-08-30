@@ -123,9 +123,7 @@ class ProcessView(Vertical):
         return [
             p
             for p in self._processes
-            if needle in p.command.lower()
-            or needle in p.username.lower()
-            or needle in str(p.pid)
+            if needle in p.command.lower() or needle in p.username.lower() or needle in str(p.pid)
         ]
 
     @staticmethod
@@ -241,8 +239,7 @@ class ProcessView(Vertical):
 
         lines = [
             f"[b]{system.get_cpu_model()}[/b]  ({physical}C / {logical}T)",
-            f"Uptime {system.get_uptime()}    "
-            f"Load {one:.2f} {five:.2f} {fifteen:.2f}",
+            f"Uptime {system.get_uptime()}    Load {one:.2f} {five:.2f} {fifteen:.2f}",
             f"Tasks {len(self._processes)} ({running} running"
             + (f", {threads} zombie" if threads else "")
             + ")    "
@@ -331,10 +328,7 @@ class ProcessView(Vertical):
             warning += "\n\nSIGKILL cannot be caught: the process will not clean up."
 
         detail = (
-            f"PID:     {info.pid}\n"
-            f"User:    {info.username}\n"
-            f"Command: {info.command[:100]}"
-            f"{warning}"
+            f"PID:     {info.pid}\nUser:    {info.username}\nCommand: {info.command[:100]}{warning}"
         )
 
         def respond(confirmed: bool | None) -> None:
@@ -398,8 +392,7 @@ class ProcessView(Vertical):
             self.notify(f"Process {info.pid} already exited.", severity="warning")
         except psutil.AccessDenied:
             self.notify(
-                f"Permission denied renicing {info.pid}. Lowering the nice value "
-                "requires root.",
+                f"Permission denied renicing {info.pid}. Lowering the nice value requires root.",
                 severity="error",
             )
         except psutil.Error as exc:

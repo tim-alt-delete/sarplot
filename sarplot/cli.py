@@ -20,12 +20,8 @@ TAB_CHOICES = {
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sarplot",
-        description=(
-            "A terminal dashboard for live system metrics and sysstat (sar) history."
-        ),
-        epilog=(
-            "Historical metrics require sysstat. Without it, the live tabs still work."
-        ),
+        description=("A terminal dashboard for live system metrics and sysstat (sar) history."),
+        epilog=("Historical metrics require sysstat. Without it, the live tabs still work."),
     )
     parser.add_argument(
         "-f",

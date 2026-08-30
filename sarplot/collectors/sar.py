@@ -221,10 +221,7 @@ def is_available() -> bool:
 def missing_reason() -> str:
     """A human-readable explanation of why history is unavailable."""
     if shutil.which(SADF_BINARY) is None:
-        return (
-            "The 'sadf' command was not found. Install sysstat to enable "
-            "historical metrics."
-        )
+        return "The 'sadf' command was not found. Install sysstat to enable historical metrics."
     searched = ", ".join(LOG_DIRECTORIES)
     return (
         f"No sysstat archives found in {searched}. Enable collection so sar "
@@ -299,9 +296,7 @@ def _run_sadf(path: str, flags: tuple[str, ...], start: str, end: str) -> str:
     except FileNotFoundError as exc:
         raise SarUnavailable(missing_reason()) from exc
     except subprocess.TimeoutExpired as exc:
-        raise SarError(
-            f"sadf timed out after {SADF_TIMEOUT_SECONDS}s reading {path}."
-        ) from exc
+        raise SarError(f"sadf timed out after {SADF_TIMEOUT_SECONDS}s reading {path}.") from exc
     except subprocess.CalledProcessError as exc:
         detail = (exc.stderr or "").strip() or f"exit status {exc.returncode}"
         raise SarError(f"sadf failed: {detail}") from exc

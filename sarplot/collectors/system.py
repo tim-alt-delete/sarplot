@@ -162,11 +162,7 @@ def get_interfaces() -> list[Interface]:
     for name, addresses in psutil.net_if_addrs().items():
         ipv4 = tuple(a.address for a in addresses if a.family == socket.AF_INET)
         # Link-local IPv6 carries a %scope suffix that adds noise.
-        ipv6 = tuple(
-            a.address.partition("%")[0]
-            for a in addresses
-            if a.family == socket.AF_INET6
-        )
+        ipv6 = tuple(a.address.partition("%")[0] for a in addresses if a.family == socket.AF_INET6)
         if not ipv4 and not ipv6:
             continue
 
