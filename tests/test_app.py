@@ -3,11 +3,22 @@
 from __future__ import annotations
 
 import asyncio
+import os
+from pathlib import Path
 
-from textual.widgets import DataTable, Input, Select, SelectionList, Static
+from textual.widgets import (
+    Checkbox,
+    DataTable,
+    DirectoryTree,
+    Input,
+    RichLog,
+    Select,
+    SelectionList,
+    Static,
+)
 
 from sarplot.app import TAB_VIEWS, SarPlot
-from sarplot.collectors import sar
+from sarplot.collectors import logs, sar
 from sarplot.views.process_view import COLUMNS
 from sarplot.widgets.confirm import ConfirmScreen
 from sarplot.widgets.prompt import IntPromptScreen
@@ -452,3 +463,320 @@ class TestLiveView:
 
             assert "memory" in view._history.names
             assert "total" not in view._history.names
+
+
+def make_log(directory: Path, name: str = "app.log", count: int = 30) -> Path:
+    """Write a log with a predictable mix of severities."""
+    path = directory / name
+    path.write_text(
+        "".join(
+            f"2026-08-30 10:{i:02d}:00 host app[42]: "
+            + (
+                "ERROR database timeout"
+                if i % 7 == 0
+                else "WARNING slow query"
+                if i % 5 == 0
+                else "request handled ok"
+            )
+            + "\n"
+            for i in range(count)
+        )
+    )
+    return path
+
+
+class TestLogView:
+    async def test_opens_the_requested_file(self, tmp_path):
+        path = make_log(tmp_path)
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path), log_file=str(path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            assert app.query_one("#log-main").border_title == str(path)
+            assert app.query_one("#log-output", RichLog).lines
+            assert "30 lines" in text_of(app.query_one("#log-status", Static))
+
+    async def test_bracketed_text_survives_rendering(self, tmp_path):
+        """RichLog(markup=True) would eat program[pid], which is the syslog
+        format, so lines must be written as Text objects."""
+        path = tmp_path / "b.log"
+        path.write_text("Aug 30 10:49:01 host sshd[1234]: Accepted for [alice]\n")
+
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path), log_file=str(path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            rendered = app.query_one("#log-output", RichLog).lines[0].text
+            assert "sshd[1234]" in rendered
+            assert "[alice]" in rendered
+
+    async def test_tree_is_rooted_at_the_log_directory(self, tmp_path):
+        make_log(tmp_path)
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            assert app.query_one("#log-tree", DirectoryTree).path == tmp_path
+
+    async def test_tree_hides_binaries_and_unreadable_files(self, tmp_path):
+        make_log(tmp_path, "good.log")
+        (tmp_path / "wtmp").write_bytes(b"")
+        (tmp_path / "blob.bin").write_bytes(b"\x00\x01\x02\x03")
+        (tmp_path / ".hidden").write_text("secret\n")
+
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            tree = app.query_one("#log-tree", DirectoryTree)
+            kept = {p.name for p in tree.filter_paths(sorted(tmp_path.iterdir()))}
+            assert kept == {"good.log"}
+
+    async def test_selecting_a_file_loads_it(self, tmp_path):
+        make_log(tmp_path, "first.log")
+        second = make_log(tmp_path, "second.log", count=5)
+
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            app.query_one("#logs").open_path(second)
+            await settle(pilot)
+
+            assert app.query_one("#log-main").border_title == str(second)
+            assert "5 lines" in text_of(app.query_one("#log-status", Static))
+
+    async def test_unreadable_file_reports_instead_of_crashing(self, tmp_path):
+        blob = tmp_path / "blob.bin"
+        blob.write_bytes(b"\x00\x01\x02binary\x00")
+
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            app.query_one("#logs").open_path(blob)
+            await settle(pilot)
+
+            assert "binary" in text_of(app.query_one("#log-status", Static))
+            assert app._exception is None
+
+    async def test_empty_directory_explains_itself(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(logs, "SYSTEM_LOG_CANDIDATES", ())
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            status = text_of(app.query_one("#log-status", Static))
+            assert "No" in status
+            assert app._exception is None
+
+
+class TestLogSearch:
+    @staticmethod
+    async def _open(tmp_path, pilot_size=SIZE):
+        path = make_log(tmp_path)
+        return SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path), log_file=str(path))
+
+    async def test_filter_hides_non_matching_lines(self, tmp_path):
+        app = await self._open(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            output = app.query_one("#log-output", RichLog)
+            assert len(output.lines) == 30
+
+            app.query_one("#log-search", Input).value = "ERROR"
+            await settle(pilot)
+
+            assert len(output.lines) == 5
+            assert all("ERROR" in strip.text for strip in output.lines)
+
+    async def test_clearing_the_filter_restores_every_line(self, tmp_path):
+        app = await self._open(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            output = app.query_one("#log-output", RichLog)
+
+            app.query_one("#log-search", Input).value = "ERROR"
+            await settle(pilot)
+            app.query_one("#log-search", Input).value = ""
+            await settle(pilot)
+
+            assert len(output.lines) == 30
+
+    async def test_search_is_case_insensitive_by_default(self, tmp_path):
+        app = await self._open(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            app.query_one("#log-search", Input).value = "error"
+            await settle(pilot)
+            assert len(app.query_one("#log-output", RichLog).lines) == 5
+
+    async def test_case_toggle_makes_the_search_exact(self, tmp_path):
+        app = await self._open(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            app.query_one("#log-case", Checkbox).value = True
+            app.query_one("#log-search", Input).value = "error"
+            await settle(pilot)
+            assert len(app.query_one("#log-output", RichLog).lines) == 0
+
+    async def test_literal_search_does_not_treat_input_as_regex(self, tmp_path):
+        """'app[42]' must match literally when the regex toggle is off."""
+        path = tmp_path / "b.log"
+        path.write_text("host app[42]: hello\nhost appX: world\n")
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path), log_file=str(path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            app.query_one("#log-search", Input).value = "app[42]"
+            await settle(pilot)
+
+            lines = app.query_one("#log-output", RichLog).lines
+            assert len(lines) == 1
+            assert "app[42]" in lines[0].text
+
+    async def test_regex_toggle_enables_patterns(self, tmp_path):
+        app = await self._open(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            app.query_one("#log-regex", Checkbox).value = True
+            app.query_one("#log-search", Input).value = "ERROR|WARNING"
+            await settle(pilot)
+
+            output = app.query_one("#log-output", RichLog)
+            assert len(output.lines) > 5
+            assert all("ERROR" in strip.text or "WARNING" in strip.text for strip in output.lines)
+
+    async def test_invalid_regex_is_reported_not_raised(self, tmp_path):
+        """A half-typed pattern is a normal intermediate state."""
+        app = await self._open(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            app.query_one("#log-regex", Checkbox).value = True
+            app.query_one("#log-search", Input).value = "unclosed["
+            await settle(pilot)
+
+            status = app.query_one("#log-status", Static)
+            assert "Invalid regular expression" in text_of(status)
+            assert status.has_class("-error")
+            assert app._exception is None
+
+    async def test_invalid_regex_keeps_the_previous_results(self, tmp_path):
+        app = await self._open(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            output = app.query_one("#log-output", RichLog)
+
+            app.query_one("#log-regex", Checkbox).value = True
+            app.query_one("#log-search", Input).value = "ERROR"
+            await settle(pilot)
+            good = len(output.lines)
+
+            app.query_one("#log-search", Input).value = "ERROR("
+            await settle(pilot)
+            assert len(output.lines) == good
+
+    async def test_highlight_mode_keeps_every_line(self, tmp_path):
+        app = await self._open(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            app.query_one("#log-filter-mode", Checkbox).value = False
+            app.query_one("#log-search", Input).value = "ERROR"
+            await settle(pilot)
+
+            assert len(app.query_one("#log-output", RichLog).lines) == 30
+            assert "highlighted" in text_of(app.query_one("#log-status", Static))
+
+    async def test_next_match_scrolls_between_matches(self, tmp_path):
+        app = await self._open(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            view = app.query_one("#logs")
+            app.query_one("#log-filter-mode", Checkbox).value = False
+            app.query_one("#log-search", Input).value = "ERROR"
+            await settle(pilot)
+
+            assert len(view._match_offsets) == 5
+            view.action_next_match()
+            await pilot.pause()
+            first = view._match_index
+            view.action_next_match()
+            await pilot.pause()
+            assert view._match_index == first + 1
+
+    async def test_match_jumping_wraps_around(self, tmp_path):
+        app = await self._open(tmp_path)
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            view = app.query_one("#logs")
+            app.query_one("#log-filter-mode", Checkbox).value = False
+            app.query_one("#log-search", Input).value = "ERROR"
+            await settle(pilot)
+
+            view.action_previous_match()
+            await pilot.pause()
+            assert view._match_index == len(view._match_offsets) - 1
+
+
+class TestLogFollow:
+    async def test_appended_lines_appear(self, tmp_path):
+        path = make_log(tmp_path, count=5)
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path), log_file=str(path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            output = app.query_one("#log-output", RichLog)
+            assert len(output.lines) == 5
+
+            with path.open("a") as handle:
+                handle.write("brand new line\n")
+            await settle(pilot, 1.2)
+
+            assert len(output.lines) == 6
+            assert "brand new line" in output.lines[-1].text
+
+    async def test_rotation_reloads_the_pane(self, tmp_path):
+        path = make_log(tmp_path, count=5)
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path), log_file=str(path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            output = app.query_one("#log-output", RichLog)
+
+            os.rename(path, tmp_path / "app.log.1")
+            path.write_text("after rotation\n")
+            await settle(pilot, 1.2)
+
+            assert len(output.lines) == 1
+            assert "after rotation" in output.lines[0].text
+
+    async def test_unfollowed_pane_ignores_appends(self, tmp_path):
+        path = make_log(tmp_path, count=5)
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path), log_file=str(path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            output = app.query_one("#log-output", RichLog)
+
+            app.query_one("#log-follow", Checkbox).value = False
+            await settle(pilot)
+
+            with path.open("a") as handle:
+                handle.write("ignored\n")
+            await settle(pilot, 1.2)
+
+            assert len(output.lines) == 5
+            assert "paused" in text_of(app.query_one("#log-status", Static))
+
+    async def test_polling_pauses_when_the_tab_is_hidden(self):
+        app = SarPlot()
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot)
+            view = app.query_one("#logs")
+            assert view._timer._active.is_set() is False
+
+            app.query_one("#tabs").active = "tab-logs"
+            await settle(pilot)
+            assert view._timer._active.is_set() is True
+
+    async def test_compressed_archive_is_read_but_not_followed(self, tmp_path):
+        import gzip
+
+        path = tmp_path / "old.log.gz"
+        with gzip.open(path, "wb") as handle:
+            handle.write(b"".join(f"archived {i}\n".encode() for i in range(4)))
+
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path), log_file=str(path))
+        async with app.run_test(size=SIZE) as pilot:
+            await settle(pilot, 0.6)
+            assert len(app.query_one("#log-output", RichLog).lines) == 4
+            assert "not followable" in text_of(app.query_one("#log-status", Static))

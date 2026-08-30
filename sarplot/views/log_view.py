@@ -381,7 +381,15 @@ class LogView(Horizontal):
         """
         if not self._match_offsets:
             return
-        self._match_index = (self._match_index + direction) % len(self._match_offsets)
+
+        if self._match_index < 0:
+            # Nothing selected yet: forwards starts at the first match,
+            # backwards at the last, rather than falling out of the modulo
+            # two short of the end.
+            self._match_index = 0 if direction > 0 else len(self._match_offsets) - 1
+        else:
+            self._match_index = (self._match_index + direction) % len(self._match_offsets)
+
         output = self.query_one("#log-output", RichLog)
         output.scroll_to(y=self._match_offsets[self._match_index], animate=False)
         self._update_status()
