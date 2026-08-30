@@ -1,0 +1,6 @@
+{"__CURSOR": "s=abc;i=1;b=def;t=659445c36b000", "__REALTIME_TIMESTAMP": "1787000000000000", "__MONOTONIC_TIMESTAMP": "0", "_BOOT_ID": "0123456789abcdef0123456789abcdef", "PRIORITY": "6", "_HOSTNAME": "testhost", "SYSLOG_IDENTIFIER": "test", "_PID": "1", "_COMM": "test", "MESSAGE": [99, 97, 102, 233, 32, 255]}
+{"MESSAGE": "no timestamp, no priority"}
+{"__CURSOR": "s=abc;i=0;b=def;t=659445c36b000", "__REALTIME_TIMESTAMP": "1787000000000000", "__MONOTONIC_TIMESTAMP": "0", "_BOOT_ID": "0123456789abcdef0123456789abcdef", "PRIORITY": "6", "_HOSTNAME": "testhost", "SYSLOG_IDENTIFIER": "", "_PID": "0", "_COMM": "", "MESSAGE": "missing identifier"}
+
+{not valid json
+["not", "an", "object"]
