@@ -198,6 +198,39 @@ class TestChooseDefaultSeries:
         chosen = sar.choose_default_series(series, sar.METRICS_BY_KEY["cpu-per-core"], limit=3)
         assert len(chosen) == 3
 
+    @pytest.mark.parametrize(
+        ("fixture", "metric"),
+        [
+            ("cpu", "cpu"),
+            ("cpu_per_core", "cpu-per-core"),
+            ("memory", "memory"),
+            ("swap", "swap"),
+            ("queue", "load"),
+            ("io", "io"),
+            ("network", "network"),
+            ("disk", "disk"),
+            ("paging", "paging"),
+        ],
+    )
+    def test_defaults_never_mix_percentages_with_absolute_values(self, fixture, metric):
+        """A percentage plotted beside kB values is flattened to a flat line
+        against a multi-million-unit axis."""
+        series = sar.parse(load_fixture(fixture))
+        chosen = sar.choose_default_series(series, sar.METRICS_BY_KEY[metric])
+        percentages = [name for name in chosen if "percent" in name]
+        assert not percentages or len(percentages) == len(chosen), chosen
+
+    def test_memory_defaults_to_absolute_series(self):
+        series = sar.parse(load_fixture("memory"))
+        chosen = sar.choose_default_series(series, sar.METRICS_BY_KEY["memory"])
+        assert chosen == ["memused", "avail", "cached", "buffers"]
+
+    def test_stops_once_every_pattern_has_matched(self):
+        """Otherwise a looser tier pads the list with near-duplicates."""
+        series = sar.parse(load_fixture("swap"))
+        chosen = sar.choose_default_series(series, sar.METRICS_BY_KEY["swap"])
+        assert "swpused-percent" not in chosen
+
     def test_falls_back_when_nothing_matches(self):
         series = sar.parse(load_fixture("cpu"))
         spec = sar.MetricSpec("x", "X", ("-u",), preferred=("nonexistent",))

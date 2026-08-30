@@ -86,7 +86,9 @@ METRICS: tuple[MetricSpec, ...] = (
         label="Memory",
         flags=("-r",),
         unit="kB",
-        preferred=("memused-percent", "memused", "avail"),
+        # Kept unit-consistent: mixing a percentage with kB values flattens
+        # the percentage against a multi-million-unit axis.
+        preferred=("memused", "avail", "cached", "buffers"),
         description="Memory utilisation.",
     ),
     MetricSpec(
@@ -94,7 +96,7 @@ METRICS: tuple[MetricSpec, ...] = (
         label="Swap",
         flags=("-S",),
         unit="kB",
-        preferred=("swpused-percent", "swpused"),
+        preferred=("swpused", "swpfree", "swpcad"),
         description="Swap space utilisation.",
     ),
     MetricSpec(
@@ -503,9 +505,14 @@ def query(
 def choose_default_series(series: TimeSeries, metric: MetricSpec, limit: int = 4) -> list[str]:
     """Pick a useful initial selection of series for a metric.
 
-    Patterns are matched in tiers - exact, then suffix, then substring - so a
-    pattern like ``tps`` prefers the aggregate ``tps`` over ``io-discard.dtps``,
+    Patterns are matched in tiers - exact, then identity-suffix, then suffix,
+    then substring - so ``tps`` prefers the aggregate over ``io-discard.dtps``
     and ``ldavg-1`` does not swallow ``ldavg-15``.
+
+    Descent stops as soon as every pattern has matched, which keeps the
+    selection unit-consistent: without it, a loose substring pass would pad
+    the list with ``swpused-percent`` alongside absolute kB series, flattening
+    the percentage against a multi-million-unit axis.
 
     Falls back to the first few series alphabetically so a metric with an
     unrecognised schema still renders something.
@@ -515,11 +522,7 @@ def choose_default_series(series: TimeSeries, metric: MetricSpec, limit: int = 4
         return []
 
     chosen: list[str] = []
-
-    def take(name: str) -> bool:
-        if name not in chosen:
-            chosen.append(name)
-        return len(chosen) >= limit
+    matched: set[str] = set()
 
     matchers = (
         lambda name, pattern: name == pattern,
@@ -531,7 +534,14 @@ def choose_default_series(series: TimeSeries, metric: MetricSpec, limit: int = 4
     for matches in matchers:
         for pattern in metric.preferred:
             for name in names:
-                if matches(name, pattern) and take(name):
+                if not matches(name, pattern):
+                    continue
+                matched.add(pattern)
+                if name not in chosen:
+                    chosen.append(name)
+                if len(chosen) >= limit:
                     return chosen
+        if matched and len(matched) == len(metric.preferred):
+            break
 
     return chosen or names[:limit]
