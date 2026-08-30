@@ -1,0 +1,88 @@
+{
+ "sysstat": {
+  "hosts": [
+   {
+    "nodename": "testhost",
+    "sysname": "Linux",
+    "release": "7.0.12",
+    "machine": "aarch64",
+    "number-of-cpus": 10,
+    "file-date": "2026-08-30",
+    "file-utc-time": "14:50:24",
+    "timezone": "EDT",
+    "statistics": [
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:25",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "io": {
+       "tps": 147.0,
+       "io-reads": {
+        "rtps": 0.0,
+        "bread": 0.0
+       },
+       "io-writes": {
+        "wtps": 147.0,
+        "bwrtn": 58952.0
+       },
+       "io-discard": {
+        "dtps": 0.0,
+        "bdscd": 0.0
+       }
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:26",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "io": {
+       "tps": 0.0,
+       "io-reads": {
+        "rtps": 0.0,
+        "bread": 0.0
+       },
+       "io-writes": {
+        "wtps": 0.0,
+        "bwrtn": 0.0
+       },
+       "io-discard": {
+        "dtps": 0.0,
+        "bdscd": 0.0
+       }
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:27",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "io": {
+       "tps": 0.0,
+       "io-reads": {
+        "rtps": 0.0,
+        "bread": 0.0
+       },
+       "io-writes": {
+        "wtps": 0.0,
+        "bwrtn": 0.0
+       },
+       "io-discard": {
+        "dtps": 0.0,
+        "bdscd": 0.0
+       }
+      }
+     }
+    ],
+    "restarts": []
+   }
+  ]
+ }
+}

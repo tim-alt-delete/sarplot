@@ -1,0 +1,103 @@
+{
+ "sysstat": {
+  "hosts": [
+   {
+    "nodename": "testhost",
+    "sysname": "Linux",
+    "release": "7.0.12",
+    "machine": "aarch64",
+    "number-of-cpus": 10,
+    "file-date": "2026-08-30",
+    "file-utc-time": "14:50:24",
+    "timezone": "EDT",
+    "statistics": [
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:25",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "memory": {
+       "memfree": 5305408,
+       "avail": 7166432,
+       "memused": 942160,
+       "memused-percent": 11.41,
+       "buffers": 39472,
+       "cached": 1818240,
+       "commit": 952448,
+       "commit-percent": 11.54,
+       "active": 354000,
+       "inactive": 2369200,
+       "dirty": 5856
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:26",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "memory": {
+       "memfree": 5307456,
+       "avail": 7168480,
+       "memused": 940096,
+       "memused-percent": 11.39,
+       "buffers": 39472,
+       "cached": 1818256,
+       "commit": 952448,
+       "commit-percent": 11.54,
+       "active": 354000,
+       "inactive": 2369200,
+       "dirty": 5872
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:27",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "memory": {
+       "memfree": 5309280,
+       "avail": 7170304,
+       "memused": 938256,
+       "memused-percent": 11.36,
+       "buffers": 39472,
+       "cached": 1818272,
+       "commit": 952448,
+       "commit-percent": 11.54,
+       "active": 354000,
+       "inactive": 2369200,
+       "dirty": 5888
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:28",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "memory": {
+       "memfree": 5314432,
+       "avail": 7175456,
+       "memused": 933104,
+       "memused-percent": 11.3,
+       "buffers": 39472,
+       "cached": 1818272,
+       "commit": 952448,
+       "commit-percent": 11.54,
+       "active": 354000,
+       "inactive": 2369200,
+       "dirty": 5888
+      }
+     }
+    ],
+    "restarts": []
+   }
+  ]
+ }
+}

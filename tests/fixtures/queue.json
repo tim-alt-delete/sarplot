@@ -1,0 +1,83 @@
+{
+ "sysstat": {
+  "hosts": [
+   {
+    "nodename": "testhost",
+    "sysname": "Linux",
+    "release": "7.0.12",
+    "machine": "aarch64",
+    "number-of-cpus": 10,
+    "file-date": "2026-08-30",
+    "file-utc-time": "14:50:24",
+    "timezone": "EDT",
+    "statistics": [
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:25",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "queue": {
+       "runq-sz": 0,
+       "plist-sz": 207,
+       "ldavg-1": 1.0,
+       "ldavg-5": 0.61,
+       "ldavg-15": 0.34,
+       "blocked": 0
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:26",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "queue": {
+       "runq-sz": 1,
+       "plist-sz": 207,
+       "ldavg-1": 1.0,
+       "ldavg-5": 0.61,
+       "ldavg-15": 0.34,
+       "blocked": 0
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:27",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "queue": {
+       "runq-sz": 0,
+       "plist-sz": 207,
+       "ldavg-1": 0.92,
+       "ldavg-5": 0.6,
+       "ldavg-15": 0.34,
+       "blocked": 0
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:28",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "queue": {
+       "runq-sz": 1,
+       "plist-sz": 207,
+       "ldavg-1": 0.92,
+       "ldavg-5": 0.6,
+       "ldavg-15": 0.34,
+       "blocked": 0
+      }
+     }
+    ],
+    "restarts": []
+   }
+  ]
+ }
+}

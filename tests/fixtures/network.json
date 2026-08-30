@@ -1,0 +1,154 @@
+{
+ "sysstat": {
+  "hosts": [
+   {
+    "nodename": "testhost",
+    "sysname": "Linux",
+    "release": "7.0.12",
+    "machine": "aarch64",
+    "number-of-cpus": 10,
+    "file-date": "2026-08-30",
+    "file-utc-time": "14:50:24",
+    "timezone": "EDT",
+    "statistics": [
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:25",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "network": {
+       "net-dev": [
+        {
+         "iface": "lo",
+         "rxpck": 0.0,
+         "txpck": 0.0,
+         "rxkB": 0.0,
+         "txkB": 0.0,
+         "rxcmp": 0.0,
+         "txcmp": 0.0,
+         "rxmcst": 0.0,
+         "ifutil-percent": 0.0
+        },
+        {
+         "iface": "eth0",
+         "rxpck": 0.0,
+         "txpck": 0.0,
+         "rxkB": 0.0,
+         "txkB": 0.0,
+         "rxcmp": 0.0,
+         "txcmp": 0.0,
+         "rxmcst": 0.0,
+         "ifutil-percent": 0.0
+        },
+        {
+         "iface": "docker0",
+         "rxpck": 0.0,
+         "txpck": 0.0,
+         "rxkB": 0.0,
+         "txkB": 0.0,
+         "rxcmp": 0.0,
+         "txcmp": 0.0,
+         "rxmcst": 0.0,
+         "ifutil-percent": 0.0
+        }
+       ]
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:26",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "network": {
+       "net-dev": [
+        {
+         "iface": "lo",
+         "rxpck": 0.0,
+         "txpck": 0.0,
+         "rxkB": 0.0,
+         "txkB": 0.0,
+         "rxcmp": 0.0,
+         "txcmp": 0.0,
+         "rxmcst": 0.0,
+         "ifutil-percent": 0.0
+        },
+        {
+         "iface": "eth0",
+         "rxpck": 0.0,
+         "txpck": 0.0,
+         "rxkB": 0.0,
+         "txkB": 0.0,
+         "rxcmp": 0.0,
+         "txcmp": 0.0,
+         "rxmcst": 0.0,
+         "ifutil-percent": 0.0
+        },
+        {
+         "iface": "docker0",
+         "rxpck": 0.0,
+         "txpck": 0.0,
+         "rxkB": 0.0,
+         "txkB": 0.0,
+         "rxcmp": 0.0,
+         "txcmp": 0.0,
+         "rxmcst": 0.0,
+         "ifutil-percent": 0.0
+        }
+       ]
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:27",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "network": {
+       "net-dev": [
+        {
+         "iface": "lo",
+         "rxpck": 0.0,
+         "txpck": 0.0,
+         "rxkB": 0.0,
+         "txkB": 0.0,
+         "rxcmp": 0.0,
+         "txcmp": 0.0,
+         "rxmcst": 0.0,
+         "ifutil-percent": 0.0
+        },
+        {
+         "iface": "eth0",
+         "rxpck": 0.0,
+         "txpck": 0.0,
+         "rxkB": 0.0,
+         "txkB": 0.0,
+         "rxcmp": 0.0,
+         "txcmp": 0.0,
+         "rxmcst": 0.0,
+         "ifutil-percent": 0.0
+        },
+        {
+         "iface": "docker0",
+         "rxpck": 0.0,
+         "txpck": 0.0,
+         "rxkB": 0.0,
+         "txkB": 0.0,
+         "rxcmp": 0.0,
+         "txcmp": 0.0,
+         "rxmcst": 0.0,
+         "ifutil-percent": 0.0
+        }
+       ]
+      }
+     }
+    ],
+    "restarts": []
+   }
+  ]
+ }
+}

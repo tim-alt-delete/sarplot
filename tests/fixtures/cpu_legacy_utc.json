@@ -1,0 +1,95 @@
+{
+ "sysstat": {
+  "hosts": [
+   {
+    "nodename": "testhost",
+    "sysname": "Linux",
+    "release": "7.0.12",
+    "machine": "aarch64",
+    "number-of-cpus": 10,
+    "file-date": "2026-08-30",
+    "file-utc-time": "14:50:24",
+    "timezone": "EDT",
+    "statistics": [
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:25",
+       "interval": 1,
+       "utc": 0
+      },
+      "cpu-load": [
+       {
+        "cpu": "all",
+        "user": 3.55,
+        "nice": 0.0,
+        "system": 2.66,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 93.79
+       }
+      ]
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:26",
+       "interval": 1,
+       "utc": 0
+      },
+      "cpu-load": [
+       {
+        "cpu": "all",
+        "user": 3.26,
+        "nice": 0.0,
+        "system": 2.37,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 94.36
+       }
+      ]
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:27",
+       "interval": 1,
+       "utc": 0
+      },
+      "cpu-load": [
+       {
+        "cpu": "all",
+        "user": 2.58,
+        "nice": 0.0,
+        "system": 2.68,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 94.75
+       }
+      ]
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:28",
+       "interval": 1,
+       "utc": 0
+      },
+      "cpu-load": [
+       {
+        "cpu": "all",
+        "user": 2.88,
+        "nice": 0.0,
+        "system": 2.38,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 94.74
+       }
+      ]
+     }
+    ],
+    "restarts": []
+   }
+  ]
+ }
+}

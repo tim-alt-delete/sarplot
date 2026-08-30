@@ -1,0 +1,79 @@
+{
+ "sysstat": {
+  "hosts": [
+   {
+    "nodename": "testhost",
+    "sysname": "Linux",
+    "release": "7.0.12",
+    "machine": "aarch64",
+    "number-of-cpus": 10,
+    "file-date": "2026-08-30",
+    "file-utc-time": "14:50:24",
+    "timezone": "EDT",
+    "statistics": [
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:25",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "paging": {
+       "pgpgin": 0.0,
+       "pgpgout": 29476.0,
+       "fault": 17.0,
+       "majflt": 0.0,
+       "pgfree": 66.0,
+       "pgscank": 0.0,
+       "pgscand": 0.0,
+       "pgsteal": 0.0,
+       "pgprom": 0.0,
+       "pgdem": 0.0
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:26",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "paging": {
+       "pgpgin": 0.0,
+       "pgpgout": 0.0,
+       "fault": 1.0,
+       "majflt": 0.0,
+       "pgfree": 0.0,
+       "pgscank": 0.0,
+       "pgscand": 0.0,
+       "pgsteal": 0.0,
+       "pgprom": 0.0,
+       "pgdem": 0.0
+      }
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:27",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "paging": {
+       "pgpgin": 0.0,
+       "pgpgout": 0.0,
+       "fault": 6.0,
+       "majflt": 0.0,
+       "pgfree": 0.0,
+       "pgscank": 0.0,
+       "pgscand": 0.0,
+       "pgsteal": 0.0,
+       "pgprom": 0.0,
+       "pgdem": 0.0
+      }
+     }
+    ],
+    "restarts": []
+   }
+  ]
+ }
+}

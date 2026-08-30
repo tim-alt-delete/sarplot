@@ -1,0 +1,237 @@
+{
+ "sysstat": {
+  "hosts": [
+   {
+    "nodename": "testhost",
+    "sysname": "Linux",
+    "release": "7.0.12",
+    "machine": "aarch64",
+    "number-of-cpus": 10,
+    "file-date": "2026-08-30",
+    "file-utc-time": "14:50:24",
+    "timezone": "EDT",
+    "statistics": [
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:25",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "cpu-load": [
+       {
+        "cpu": "all",
+        "user": 3.55,
+        "nice": 0.0,
+        "system": 2.66,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 93.79
+       },
+       {
+        "cpu": "0",
+        "user": 1.79,
+        "nice": 0.0,
+        "system": 11.61,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 86.61
+       },
+       {
+        "cpu": "1",
+        "user": 17.82,
+        "nice": 0.0,
+        "system": 2.97,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 79.21
+       },
+       {
+        "cpu": "2",
+        "user": 2.94,
+        "nice": 0.0,
+        "system": 1.96,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 95.1
+       },
+       {
+        "cpu": "3",
+        "user": 3.0,
+        "nice": 0.0,
+        "system": 1.0,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 96.0
+       },
+       {
+        "cpu": "4",
+        "user": 0.0,
+        "nice": 0.0,
+        "system": 1.98,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 98.02
+       },
+       {
+        "cpu": "5",
+        "user": 3.92,
+        "nice": 0.0,
+        "system": 1.96,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 94.12
+       },
+       {
+        "cpu": "6",
+        "user": 1.01,
+        "nice": 0.0,
+        "system": 2.02,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 96.97
+       },
+       {
+        "cpu": "7",
+        "user": 1.02,
+        "nice": 0.0,
+        "system": 1.02,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 97.96
+       },
+       {
+        "cpu": "8",
+        "user": 2.0,
+        "nice": 0.0,
+        "system": 1.0,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 97.0
+       },
+       {
+        "cpu": "9",
+        "user": 2.02,
+        "nice": 0.0,
+        "system": 0.0,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 97.98
+       }
+      ]
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:26",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "cpu-load": [
+       {
+        "cpu": "all",
+        "user": 3.26,
+        "nice": 0.0,
+        "system": 2.37,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 94.36
+       },
+       {
+        "cpu": "0",
+        "user": 0.89,
+        "nice": 0.0,
+        "system": 11.61,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 87.5
+       },
+       {
+        "cpu": "1",
+        "user": 8.91,
+        "nice": 0.0,
+        "system": 4.95,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 86.14
+       },
+       {
+        "cpu": "2",
+        "user": 6.0,
+        "nice": 0.0,
+        "system": 2.0,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 92.0
+       },
+       {
+        "cpu": "3",
+        "user": 3.92,
+        "nice": 0.0,
+        "system": 0.98,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 95.1
+       },
+       {
+        "cpu": "4",
+        "user": 3.0,
+        "nice": 0.0,
+        "system": 0.0,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 97.0
+       },
+       {
+        "cpu": "5",
+        "user": 2.02,
+        "nice": 0.0,
+        "system": 1.01,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 96.97
+       },
+       {
+        "cpu": "6",
+        "user": 3.0,
+        "nice": 0.0,
+        "system": 0.0,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 97.0
+       },
+       {
+        "cpu": "7",
+        "user": 1.02,
+        "nice": 0.0,
+        "system": 0.0,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 98.98
+       },
+       {
+        "cpu": "8",
+        "user": 3.0,
+        "nice": 0.0,
+        "system": 1.0,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 96.0
+       },
+       {
+        "cpu": "9",
+        "user": 1.01,
+        "nice": 0.0,
+        "system": 1.01,
+        "iowait": 0.0,
+        "steal": 0.0,
+        "idle": 97.98
+       }
+      ]
+     }
+    ],
+    "restarts": []
+   }
+  ]
+ }
+}

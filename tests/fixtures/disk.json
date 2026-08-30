@@ -1,0 +1,241 @@
+{
+ "sysstat": {
+  "hosts": [
+   {
+    "nodename": "testhost",
+    "sysname": "Linux",
+    "release": "7.0.12",
+    "machine": "aarch64",
+    "number-of-cpus": 10,
+    "file-date": "2026-08-30",
+    "file-utc-time": "14:50:24",
+    "timezone": "EDT",
+    "statistics": [
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:25",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "disk": [
+       {
+        "disk-device": "vda",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       },
+       {
+        "disk-device": "vdb",
+        "tps": 147.0,
+        "rd_sec": 0.0,
+        "wr_sec": 58952.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 29476.0,
+        "dkB": 0.0,
+        "avgrq-sz": 401.03,
+        "areq-sz": 200.52,
+        "avgqu-sz": 0.54,
+        "aqu-sz": 0.54,
+        "await": 3.66,
+        "util-percent": 1.2
+       },
+       {
+        "disk-device": "vdc",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       },
+       {
+        "disk-device": "vdd",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       }
+      ]
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:26",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "disk": [
+       {
+        "disk-device": "vda",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       },
+       {
+        "disk-device": "vdb",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       },
+       {
+        "disk-device": "vdc",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       },
+       {
+        "disk-device": "vdd",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       }
+      ]
+     },
+     {
+      "timestamp": {
+       "date": "2026-08-30",
+       "time": "14:50:27",
+       "tz": "UTC",
+       "interval": 1
+      },
+      "disk": [
+       {
+        "disk-device": "vda",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       },
+       {
+        "disk-device": "vdb",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       },
+       {
+        "disk-device": "vdc",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       },
+       {
+        "disk-device": "vdd",
+        "tps": 0.0,
+        "rd_sec": 0.0,
+        "wr_sec": 0.0,
+        "dc_sec": 0.0,
+        "rkB": 0.0,
+        "wkB": 0.0,
+        "dkB": 0.0,
+        "avgrq-sz": 0.0,
+        "areq-sz": 0.0,
+        "avgqu-sz": 0.0,
+        "aqu-sz": 0.0,
+        "await": 0.0,
+        "util-percent": 0.0
+       }
+      ]
+     }
+    ],
+    "restarts": []
+   }
+  ]
+ }
+}
