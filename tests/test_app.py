@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 
-import pytest
 from textual.widgets import DataTable, Input, Select, SelectionList, Static
 
 from sarplot.app import TAB_VIEWS, SarPlot
@@ -351,16 +350,9 @@ class TestRenice:
 
 
 class TestHistoryView:
-    async def test_reads_a_real_archive(self, tmp_path):
-        """Uses the sadf binary against a captured archive when available."""
-        archive = "/tmp/opencode/sadata/sa_test"
-        import shutil
-        from pathlib import Path
-
-        if not Path(archive).exists() or shutil.which("sadf") is None:
-            pytest.skip("sysstat or the captured archive is unavailable")
-
-        app = SarPlot(sa_file=archive, initial_tab="tab-history")
+    async def test_reads_a_real_archive(self, sar_archive):
+        """Drives the real sadf binary against a freshly collected archive."""
+        app = SarPlot(sa_file=str(sar_archive), initial_tab="tab-history")
         async with app.run_test(size=SIZE) as pilot:
             await settle(pilot, 1.5)
 
@@ -371,15 +363,8 @@ class TestHistoryView:
             assert len(selection._options) > 0
             assert selection.selected, "expected default series to be preselected"
 
-    async def test_changing_metric_reloads_series(self, tmp_path):
-        archive = "/tmp/opencode/sadata/sa_test"
-        import shutil
-        from pathlib import Path
-
-        if not Path(archive).exists() or shutil.which("sadf") is None:
-            pytest.skip("sysstat or the captured archive is unavailable")
-
-        app = SarPlot(sa_file=archive, initial_tab="tab-history")
+    async def test_changing_metric_reloads_series(self, sar_archive):
+        app = SarPlot(sa_file=str(sar_archive), initial_tab="tab-history")
         async with app.run_test(size=SIZE) as pilot:
             await settle(pilot, 1.5)
             selection = app.query_one("#series-select", SelectionList)
@@ -392,15 +377,8 @@ class TestHistoryView:
             assert memory_series != cpu_series
             assert "memused" in memory_series
 
-    async def test_invalid_time_is_reported_not_raised(self, tmp_path):
-        archive = "/tmp/opencode/sadata/sa_test"
-        import shutil
-        from pathlib import Path
-
-        if not Path(archive).exists() or shutil.which("sadf") is None:
-            pytest.skip("sysstat or the captured archive is unavailable")
-
-        app = SarPlot(sa_file=archive, initial_tab="tab-history")
+    async def test_invalid_time_is_reported_not_raised(self, sar_archive):
+        app = SarPlot(sa_file=str(sar_archive), initial_tab="tab-history")
         async with app.run_test(size=SIZE) as pilot:
             await settle(pilot, 1.2)
             app.query_one("#start-input", Input).value = "banana"
