@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from collections import deque
 from dataclasses import dataclass
@@ -94,7 +95,10 @@ class LogDirectoryTree(DirectoryTree):
             if path.name.startswith("."):
                 continue
             if path.is_dir():
-                keep.append(path)
+                # An unreadable directory expands to nothing with no
+                # explanation, so hide it rather than offering a dead end.
+                if os.access(path, os.R_OK | os.X_OK):
+                    keep.append(path)
                 continue
             if not logs.is_readable(path):
                 # Unreadable files are hidden rather than offered and then

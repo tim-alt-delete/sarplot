@@ -6,6 +6,7 @@ import asyncio
 import os
 from pathlib import Path
 
+import pytest
 from textual.widgets import (
     Checkbox,
     DataTable,
@@ -780,3 +781,24 @@ class TestLogFollow:
             await settle(pilot, 0.6)
             assert len(app.query_one("#log-output", RichLog).lines) == 4
             assert "not followable" in text_of(app.query_one("#log-status", Static))
+
+    async def test_tree_hides_unreadable_directories(self, tmp_path):
+        """An unreadable directory expands to nothing with no explanation."""
+        if os.geteuid() == 0:
+            pytest.skip("root bypasses directory permissions")
+
+        make_log(tmp_path, "good.log")
+        (tmp_path / "visible").mkdir()
+        blocked = tmp_path / "blocked"
+        blocked.mkdir()
+        blocked.chmod(0o000)
+
+        app = SarPlot(initial_tab="tab-logs", log_dir=str(tmp_path))
+        try:
+            async with app.run_test(size=SIZE) as pilot:
+                await settle(pilot, 0.6)
+                tree = app.query_one("#log-tree", DirectoryTree)
+                kept = {p.name for p in tree.filter_paths(sorted(tmp_path.iterdir()))}
+                assert kept == {"good.log", "visible"}
+        finally:
+            blocked.chmod(0o755)
